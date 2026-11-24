@@ -36,21 +36,17 @@
  *
  *  Weitere Felder pro Turnier (alle optional):
  *    time     Startzeit 'HH:MM' (für die Uhr „Seit dem letzten Turnier“)
- *    walkOns  { Spieler: 'Interpret – Titel' } – Walk-On-Songs dieses Turniers
- *    excuses  { Spieler: 'Ausrede' } – offizielle Ausreden (Eine-Ausrede-Regel)
  *    events   [ { type: '180' | 'robinhood' | '9darter', p: 'Spieler', note: '…' } ]
  *
  *  Felder pro Spieler in `players` (alle optional, leer = „noch nicht hinterlegt“):
  *    founder       true bei Gründungsmitgliedern
  *    photo         Bildpfad, z. B. 'assets/spieler/katsche.jpg'
  *    nickname      Herkunft des Spitznamens
- *    walkOn        aktueller Walk-On-Song
+ *    walkOn        Walk-On-Song
  *    favDouble     Lieblingsdoppel (ein Pfeil), z. B. 'D16'
- *    dreamFinish   Traumfinish, z. B. 'Shanghai' oder 'Champagne-Finish (T20 T20 Bull)'
+ *    dreamFinish   Traumfinish, z. B. 'Shanghai' oder 'Champagne Finish'
  *    hand          Wurfhand
  *    darts         Darts (Marke, Gewicht)
- *    motto         Kampfspruch
- *    ritual        Ritual / Aberglaube
  *    favPlayer     Lieblingsspieler
  *
  *  nextTournament: Sobald das nächste Turnier geplant ist, z. B.
@@ -61,15 +57,15 @@
 
 window.EA_DATA = {
   players: {
-    Katsche:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Otter:      { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Quaasus:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Sweaty:     { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Killernini: { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Hugo:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Fynn:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Samier:     { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
-    Reto:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' }
+    Katsche:    { founder: true, photo: '', nickname: 'Kommt von der Legende Katsche Schwarzenbeck', walkOn: 'Katchi', favDouble: 'D20', dreamFinish: 'Champagne Finish', hand: 'Rechts', darts: 'RED DRAGON Razor 24g', favPlayer: 'Gary Anderson' },
+    Otter:      { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Quaasus:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Sweaty:     { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Killernini: { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Hugo:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Fynn:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Samier:     { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
+    Reto:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' }
   },
 
   nextTournament: null,

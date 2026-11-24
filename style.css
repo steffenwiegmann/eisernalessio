@@ -699,12 +699,6 @@ img.avatar { object-fit: cover; padding: 0; }
 .profile-facts { grid-template-columns: 1fr; gap: 12px; }
 .profile-facts > div { padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 .profile-facts > div:last-child { border-bottom: 0; padding-bottom: 0; }
-.walkon-now { display: flex; gap: 14px; align-items: center; margin-bottom: 18px; }
-.walkon-icon { font-size: 26px; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 14px; background: var(--yellow); flex: none; }
-.walkon-now .record-label { margin: 0; }
-.walkon-song { margin: 2px 0 0; font-weight: 700; font-size: 18px; }
-.excuse-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.excuse-list li { padding: 10px 14px; border-radius: var(--radius-sm); background: var(--surface-2); font-style: italic; }
 
 /* Besondere Momente (Turnierseite) */
 .moments { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }

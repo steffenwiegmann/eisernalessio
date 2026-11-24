@@ -52,9 +52,7 @@
     groupMatches: t.groupMatches || [],
     knockout: t.knockout || [],
     notes: t.notes || [],
-    events: t.events || [],
-    walkOns: t.walkOns || {},
-    excuses: t.excuses || {}
+    events: t.events || []
   }));
   const LATEST = TOURS[TOURS.length - 1];
 
@@ -115,7 +113,7 @@
     AGG[n] = {
       name: n, founder: isFounder(n), entries: [], places: [], titles: 0, finals: 0, podiums: 0,
       avgs: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
-      s180: 0, robinhood: 0, ninedarter: 0, walkOns: [], excuses: [],
+      s180: 0, robinhood: 0, ninedarter: 0,
       profile: (D.players || {})[n] || {}
     };
   });
@@ -133,8 +131,6 @@
       a.s180 += eventCount(t, p, '180');
       a.robinhood += eventCount(t, p, 'robinhood');
       a.ninedarter += eventCount(t, p, '9darter');
-      a.walkOns.push({ t, song: t.walkOns[p] || '' });
-      if (t.excuses[p]) a.excuses.push({ t, text: t.excuses[p] });
       a.places.push(place);
       if (place === 1) a.titles++;
       if (place <= 2) a.finals++;
@@ -650,14 +646,12 @@
     const momentItems = t.events.map((e) => {
       const ty = EVENT_TYPES[e.type] || { icon: '⭐', label: e.type };
       return `<li><span class="m-icon" aria-hidden="true">${ty.icon}</span><span><strong>${esc(ty.label)}</strong> · ${pLink(e.p)}${e.note ? ` <span class="muted">– ${esc(e.note)}</span>` : ''}</span></li>`;
-    }).concat(Object.keys(t.excuses).map((p) => `<li><span class="m-icon" aria-hidden="true">🤷</span><span><strong>Ausrede</strong> · ${pLink(p)} <span class="muted">– „${esc(t.excuses[p])}“</span></span></li>`));
-    const walkOnRows = Object.keys(t.walkOns).map((p) => `<tr><td>${pLink(p)}</td><td>${esc(t.walkOns[p])}</td></tr>`);
-    const notes = (momentItems.length || t.notes.length || walkOnRows.length) ? `
+    });
+    const notes = (momentItems.length || t.notes.length) ? `
       <section class="wrap section">
         ${sectionHead('Abseits der Zahlen', 'Besondere Momente')}
         ${momentItems.length ? `<ul class="moments">${momentItems.join('')}</ul>` : ''}
         ${t.notes.length ? `<div class="note">${t.notes.map((n) => `<p>ℹ️ ${esc(n)}</p>`).join('')}</div>` : ''}
-        ${walkOnRows.length ? `<p class="sub-h">Walk-On-Songs</p>${table([{ l: 'Spieler' }, { l: 'Song' }], walkOnRows, 'compact')}` : ''}
       </section>` : '';
 
     return `
@@ -887,12 +881,11 @@
     const factList = (items) => `<dl class="facts profile-facts">${items.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
     const steckbrief = factList([
       ['Spitzname-Herkunft', nv(P.nickname)],
+      ['Walk-On-Song', nv(P.walkOn)],
       ['Lieblingsdoppel', nv(P.favDouble)],
       ['Traumfinish', nv(P.dreamFinish)],
       ['Wurfhand', nv(P.hand)],
       ['Darts', nv(P.darts)],
-      ['Kampfspruch', nv(P.motto)],
-      ['Ritual / Aberglaube', nv(P.ritual)],
       ['Lieblingsspieler', nv(P.favPlayer)]
     ]);
     // automatisch berechnet
@@ -904,14 +897,6 @@
       ['Robin Hoods', `${a.robinhood} <span class="muted">· soweit erfasst</span>`],
       ...(a.ninedarter ? [['9-Darter', '✨ ' + a.ninedarter]] : [])
     ]);
-    const walkOn = `
-      <div class="walkon-now"><span class="walkon-icon" aria-hidden="true">🎵</span><div><p class="record-label">Aktueller Walk-On-Song</p><p class="walkon-song">${nv(P.walkOn)}</p></div></div>
-      ${table([{ l: 'Turnier' }, { l: 'Walk-On-Song' }], a.entries.slice().reverse().map((e) =>
-        `<tr><td>${tLink(e.t)}</td><td>${e.t.walkOns[a.name] ? esc(e.t.walkOns[a.name]) : '<span class="muted">unbekannt</span>'}</td></tr>`), 'compact')}`;
-    const excuses = a.excuses.length
-      ? `<ul class="excuse-list">${a.excuses.slice().reverse().map((x) => `<li><span class="muted">${esc(x.t.title)}:</span> „${esc(x.text)}“</li>`).join('')}</ul>`
-      : '<p class="muted">Noch keine offizielle Ausrede dokumentiert.</p>';
-
     return `
     ${pageHead(a.founder ? '👑 Gründungsmitglied' : 'Spielerprofil', esc(a.name), '',
       `${P.photo ? `<img class="profile-photo" src="${esc(P.photo)}" alt="${esc(a.name)}">` : ''}<div class="chips">${a.titles ? `<span class="chip chip-y">🏆 ${a.titles}× Turniersieger</span>` : ''}${a.ballon ? `<span class="chip">🎈 ${a.ballon}× Ballon Dart</span>` : ''}${a.hosted ? `<span class="chip">🏠 ${a.hosted}× Ausrichter</span>` : ''}</div>`)}
@@ -921,10 +906,6 @@
       <div class="panel">${sectionHead('Automatisch ermittelt', 'Fakten')}${autoFacts}</div>
     </section>
     ${records ? `<section class="wrap section">${sectionHead('Persönliche', 'Bestwerte')}<div class="records">${records}</div></section>` : ''}
-    <section class="wrap section split">
-      <div class="panel">${sectionHead('Auf die Bühne', 'Walk-On')}${walkOn}</div>
-      <div class="panel">${sectionHead('Eine-Ausrede-Regel', 'Ausreden-Archiv')}${excuses}</div>
-    </section>
     <section class="wrap section">
       ${sectionHead('Karriere', 'Turnierhistorie')}
       ${history}
