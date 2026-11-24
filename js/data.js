@@ -29,21 +29,50 @@
  *    d1       Punktdifferenz aus Sicht von p1 (optional)
  *    a1, a2   Averages (optional)
  *    c1, c2   Checkouts als Text, z. B. '2/16' (optional)
+ *    n1, n2   Geworfene Darts laut Autodarts (optional). Sind sie
+ *             zusammen mit a1/a2 bei allen Matches eines Spielers
+ *             vorhanden, berechnet die Website den Turnier-Average
+ *             exakt (Summe Ø × Darts ÷ Summe Darts).
+ *
+ *  Weitere Felder pro Turnier (alle optional):
+ *    time     Startzeit 'HH:MM' (für die Uhr „Seit dem letzten Turnier“)
+ *    walkOns  { Spieler: 'Interpret – Titel' } – Walk-On-Songs dieses Turniers
+ *    excuses  { Spieler: 'Ausrede' } – offizielle Ausreden (Eine-Ausrede-Regel)
+ *    events   [ { type: '180' | 'robinhood' | '9darter', p: 'Spieler', note: '…' } ]
+ *
+ *  Felder pro Spieler in `players` (alle optional, leer = „noch nicht hinterlegt“):
+ *    founder       true bei Gründungsmitgliedern
+ *    photo         Bildpfad, z. B. 'assets/spieler/katsche.jpg'
+ *    nickname      Herkunft des Spitznamens
+ *    walkOn        aktueller Walk-On-Song
+ *    favDouble     Lieblingsdoppel (ein Pfeil), z. B. 'D16'
+ *    dreamFinish   Traumfinish, z. B. 'Shanghai' oder 'Champagne-Finish (T20 T20 Bull)'
+ *    hand          Wurfhand
+ *    darts         Darts (Marke, Gewicht)
+ *    motto         Kampfspruch
+ *    ritual        Ritual / Aberglaube
+ *    favPlayer     Lieblingsspieler
+ *
+ *  nextTournament: Sobald das nächste Turnier geplant ist, z. B.
+ *    { date: '2026-12-12', time: '18:00', venue: 'Bovenden', host: 'Fynn' }
+ *    → Die Startseite zeigt dann einen Countdown statt der Uhr seit dem letzten Turnier.
  * ============================================================
  */
 
 window.EA_DATA = {
   players: {
-    Katsche:    { founder: true },
-    Otter:      { founder: true },
-    Quaasus:    { founder: true },
-    Sweaty:     { founder: true },
-    Killernini: {},
-    Hugo:       {},
-    Fynn:       {},
-    Samier:     {},
-    Reto:       {}
+    Katsche:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Otter:      { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Quaasus:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Sweaty:     { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Killernini: { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Hugo:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Fynn:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Samier:     { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' },
+    Reto:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', motto: '', ritual: '', favPlayer: '' }
   },
+
+  nextTournament: null,
 
   tournaments: [
     /* ---------------------------------------------------- I */
@@ -123,6 +152,7 @@ window.EA_DATA = {
       mode: '501 · Single Out · Legmodus',
       placements: ['Katsche', 'Quaasus', 'Fynn', 'Sweaty', 'Hugo', 'Samier'],
       ballonDart: 'Fynn',
+      events: [{ type: '180', p: 'Quaasus' }],
       groups: [
         {
           name: 'Gruppe A',

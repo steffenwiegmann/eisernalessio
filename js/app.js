@@ -51,9 +51,42 @@
     groups: t.groups || [],
     groupMatches: t.groupMatches || [],
     knockout: t.knockout || [],
-    notes: t.notes || []
+    notes: t.notes || [],
+    events: t.events || [],
+    walkOns: t.walkOns || {},
+    excuses: t.excuses || {}
   }));
   const LATEST = TOURS[TOURS.length - 1];
+
+  // Turnier-Average exakt aus Autodarts-Daten (Ø × Darts), wenn für alle Matches eines Spielers vorhanden
+  TOURS.forEach((t) => {
+    const acc = {};
+    const all = t.groupMatches.concat(...t.groups.map((g) => g.tiebreak || []), t.knockout.filter((m) => m.p1 && m.p2));
+    all.forEach((m) => [[m.p1, m.a1, m.n1], [m.p2, m.a2, m.n2]].forEach(([p, a, n]) => {
+      const o = acc[p] || (acc[p] = { pts: 0, darts: 0, complete: true });
+      if (isNum(a) && isNum(n) && n > 0) { o.pts += (a * n) / 3; o.darts += n; } else o.complete = false;
+    }));
+    Object.keys(acc).forEach((p) => {
+      const o = acc[p];
+      if (!o.complete || !o.darts) return;
+      let s = t.stats.find((x) => x.p === p);
+      if (!s) { s = { p }; t.stats.push(s); }
+      s.avg = Math.round(((o.pts / o.darts) * 3) * 100) / 100;
+      s.avgCalc = true;
+      s.dartsTotal = o.darts;
+    });
+  });
+
+  // Besondere Ereignisse (180er, Robin Hood, 9-Darter) je Turnier und Spieler
+  const EVENT_TYPES = { '180': { icon: '💥', label: '180' }, robinhood: { icon: '🏹', label: 'Robin Hood' }, '9darter': { icon: '✨', label: '9-Darter' } };
+  function eventCount(t, p, type) {
+    const n = t.events.filter((e) => e.type === type && e.p === p).length;
+    if (type === '180') {
+      const s = t.stats.find((x) => x.p === p);
+      return Math.max(n, s && isNum(s.s180) ? s.s180 : 0);
+    }
+    return n;
+  }
 
   const PLAYER_NAMES = (() => {
     const s = new Set(Object.keys(D.players || {}));
@@ -81,7 +114,9 @@
   PLAYER_NAMES.forEach((n) => {
     AGG[n] = {
       name: n, founder: isFounder(n), entries: [], places: [], titles: 0, finals: 0, podiums: 0,
-      avgs: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {}
+      avgs: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
+      s180: 0, robinhood: 0, ninedarter: 0, walkOns: [], excuses: [],
+      profile: (D.players || {})[n] || {}
     };
   });
   function keepBest(a, key, v, t, dir) {
@@ -95,6 +130,11 @@
       const place = i + 1;
       const stat = t.stats.find((s) => s.p === p) || null;
       a.entries.push({ t, place, stat });
+      a.s180 += eventCount(t, p, '180');
+      a.robinhood += eventCount(t, p, 'robinhood');
+      a.ninedarter += eventCount(t, p, '9darter');
+      a.walkOns.push({ t, song: t.walkOns[p] || '' });
+      if (t.excuses[p]) a.excuses.push({ t, text: t.excuses[p] });
       a.places.push(place);
       if (place === 1) a.titles++;
       if (place <= 2) a.finals++;
@@ -127,6 +167,12 @@
     a.bestPlace = a.places.length ? Math.min.apply(null, a.places) : null;
     a.matches = a.mW + a.mL;
     a.winRate = a.matches ? a.mW / a.matches : null;
+    a.since = a.entries.length ? a.entries[0].t : null;
+    const h = Object.entries(a.h2h).map(([op, x]) => ({ op, n: x.w + x.l, w: x.w, l: x.l }));
+    // Erzrivale: meiste Duelle, bei Gleichstand die knappste Bilanz
+    a.rival = h.slice().sort((x, y) => y.n - x.n || Math.abs(x.w - x.l) - Math.abs(y.w - y.l))[0] || null;
+    // Angstgegner: meiste Niederlagen (nur wenn die Bilanz negativ ist)
+    a.nemesis = h.filter((x) => x.l > x.w).sort((x, y) => y.l - x.l || (x.w - x.l) - (y.w - y.l))[0] || null;
   });
 
   // Rekord-Suche: liefert Bestwert + alle Halter
@@ -347,6 +393,18 @@
           </div>
         </div>
         ${champCard(LATEST)}
+      </div>
+    </section>
+
+    <section class="wrap section clock-section">
+      <div class="clock" id="ea-clock">
+        <p class="kicker" id="ea-clock-title"></p>
+        <div class="clock-digits" aria-live="off">
+          <div><span id="ea-d">–</span><small>Tage</small></div>
+          <div><span id="ea-h">–</span><small>Stunden</small></div>
+          <div><span id="ea-m">–</span><small>Minuten</small></div>
+        </div>
+        <p class="clock-note" id="ea-clock-note"></p>
       </div>
     </section>
 
@@ -589,7 +647,18 @@
         ${statsTable(t)}
       </section>` : (t.ballonDart ? `<section class="wrap section"><div class="records">${tourBests(t)}</div></section>` : '');
 
-    const notes = t.notes.length ? `<section class="wrap section"><div class="note">${t.notes.map((n) => `<p>ℹ️ ${esc(n)}</p>`).join('')}</div></section>` : '';
+    const momentItems = t.events.map((e) => {
+      const ty = EVENT_TYPES[e.type] || { icon: '⭐', label: e.type };
+      return `<li><span class="m-icon" aria-hidden="true">${ty.icon}</span><span><strong>${esc(ty.label)}</strong> · ${pLink(e.p)}${e.note ? ` <span class="muted">– ${esc(e.note)}</span>` : ''}</span></li>`;
+    }).concat(Object.keys(t.excuses).map((p) => `<li><span class="m-icon" aria-hidden="true">🤷</span><span><strong>Ausrede</strong> · ${pLink(p)} <span class="muted">– „${esc(t.excuses[p])}“</span></span></li>`));
+    const walkOnRows = Object.keys(t.walkOns).map((p) => `<tr><td>${pLink(p)}</td><td>${esc(t.walkOns[p])}</td></tr>`);
+    const notes = (momentItems.length || t.notes.length || walkOnRows.length) ? `
+      <section class="wrap section">
+        ${sectionHead('Abseits der Zahlen', 'Besondere Momente')}
+        ${momentItems.length ? `<ul class="moments">${momentItems.join('')}</ul>` : ''}
+        ${t.notes.length ? `<div class="note">${t.notes.map((n) => `<p>ℹ️ ${esc(n)}</p>`).join('')}</div>` : ''}
+        ${walkOnRows.length ? `<p class="sub-h">Walk-On-Songs</p>${table([{ l: 'Spieler' }, { l: 'Song' }], walkOnRows, 'compact')}` : ''}
+      </section>` : '';
 
     return `
     ${pageHead(`Turnier ${t.nr} von ${TOURS.length}`, `EA Masters <span class="hl">${t.roman}</span>`, '', chips)}
@@ -698,11 +767,13 @@
 
     return `
     ${pageHead('Zahlen, Daten, Legenden', 'Statis<span class="hl">tiken</span>', 'Ewige Tabelle, Rekorde und Ranglisten über alle EA Masters. Wird automatisch mit jedem neuen Turnier aktualisiert.')}
-    <section class="wrap kpis">
+    <section class="wrap kpis kpis-6">
       ${kpi('Turniere', TOURS.length)}
       ${kpi('Spieler', PLAYER_NAMES.length)}
       ${kpi('Matches', SCORED.length, 'mit bekanntem Ergebnis')}
       ${kpi('Legs', SCORED.reduce((s, m) => s + m.s1 + m.s2, 0))}
+      ${kpi('💥 180er', players.reduce((s, a) => s + a.s180, 0), 'soweit erfasst')}
+      ${kpi('🏹 Robin Hoods', players.reduce((s, a) => s + a.robinhood, 0), 'soweit erfasst')}
     </section>
     <section class="wrap section">
       ${sectionHead('Hall of Fame', 'Ehrentafel')}
@@ -734,10 +805,11 @@
         ${barChart(winRank, { max: 1 })}
       </div>
       <div class="panel">
-        ${sectionHead('Nebenschauplätze', 'Ausrichter &amp; Ballon Dart')}
-        ${table([{ l: 'Spieler' }, { l: 'Ausrichter', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: 'Ballon Dart', cls: 'r', title: 'Ballon-Dart-Siege' }],
-          players.filter((a) => a.hosted || a.ballon).sort((a, b) => b.hosted + b.ballon - (a.hosted + a.ballon))
-            .map((a) => `<tr><td>${pLink(a.name)}</td><td class="r num">${a.hosted}</td><td class="r num">${a.ballon}</td></tr>`), 'compact')}
+        ${sectionHead('Nebenschauplätze', 'Ehrungen &amp; Momente')}
+        ${table([{ l: 'Spieler' }, { l: '🏠', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: '🎈', cls: 'r', title: 'Ballon-Dart-Siege' }, { l: '💥 180', cls: 'r', title: '180er (soweit erfasst)' }, { l: '🏹 RH', cls: 'r', title: 'Robin Hoods (soweit erfasst)' }],
+          players.filter((a) => a.hosted || a.ballon || a.s180 || a.robinhood).sort((a, b) => (b.hosted + b.ballon + b.s180 + b.robinhood) - (a.hosted + a.ballon + a.s180 + a.robinhood))
+            .map((a) => `<tr><td>${pLink(a.name)}</td><td class="r num">${a.hosted}</td><td class="r num">${a.ballon}</td><td class="r num">${a.s180}</td><td class="r num">${a.robinhood}</td></tr>`), 'compact')}
+        <p class="muted small">🏠 Ausrichter · 🎈 Ballon Dart · 💥 180er · 🏹 Robin Hoods (RH)</p>
       </div>
     </section>`;
   }
@@ -747,7 +819,7 @@
      ========================================================= */
   function playerCard(a) {
     return `<a class="player-card" href="${pUrl(a.name)}">
-      <span class="avatar" aria-hidden="true">${esc(a.name.charAt(0))}</span>
+      ${a.profile && a.profile.photo ? `<img class="avatar" src="${esc(a.profile.photo)}" alt="">` : `<span class="avatar" aria-hidden="true">${esc(a.name.charAt(0))}</span>`}
       <span class="pc-body">
         <span class="pc-name">${esc(a.name)}${a.founder ? '<span class="badge" title="Gründungsmitglied">GM</span>' : ''}</span>
         <span class="pc-meta">${a.entries.length} Turnier${a.entries.length === 1 ? '' : 'e'}${a.titles ? ` · ${a.titles}× 🏆` : ''}${a.careerAvg != null ? ` · Ø ${num(a.careerAvg, 2)}` : ''}</span>
@@ -809,11 +881,50 @@
 
     const others = Object.values(AGG).filter((x) => x.name !== a.name).sort((x, y) => x.name.localeCompare(y.name));
 
+    // Steckbrief (manuell gepflegt in data.js → players)
+    const P = a.profile;
+    const nv = (v) => (v ? esc(v) : '<span class="muted">noch nicht hinterlegt</span>');
+    const factList = (items) => `<dl class="facts profile-facts">${items.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+    const steckbrief = factList([
+      ['Spitzname-Herkunft', nv(P.nickname)],
+      ['Lieblingsdoppel', nv(P.favDouble)],
+      ['Traumfinish', nv(P.dreamFinish)],
+      ['Wurfhand', nv(P.hand)],
+      ['Darts', nv(P.darts)],
+      ['Kampfspruch', nv(P.motto)],
+      ['Ritual / Aberglaube', nv(P.ritual)],
+      ['Lieblingsspieler', nv(P.favPlayer)]
+    ]);
+    // automatisch berechnet
+    const autoFacts = factList([
+      ['Dabei seit', a.since ? `${tLink(a.since)} <span class="muted">· ${dateShort(a.since.date)}</span>` : '–'],
+      ['Erzrivale', a.rival ? `${pLink(a.rival.op)} <span class="muted">· ${a.rival.n} Duelle, Bilanz ${a.rival.w}–${a.rival.l}</span>` : '–'],
+      ['Angstgegner', a.nemesis ? `${pLink(a.nemesis.op)} <span class="muted">· Bilanz ${a.nemesis.w}–${a.nemesis.l}</span>` : '<span class="muted">keiner – bisher</span>'],
+      ['180er', `${a.s180} <span class="muted">· soweit erfasst</span>`],
+      ['Robin Hoods', `${a.robinhood} <span class="muted">· soweit erfasst</span>`],
+      ...(a.ninedarter ? [['9-Darter', '✨ ' + a.ninedarter]] : [])
+    ]);
+    const walkOn = `
+      <div class="walkon-now"><span class="walkon-icon" aria-hidden="true">🎵</span><div><p class="record-label">Aktueller Walk-On-Song</p><p class="walkon-song">${nv(P.walkOn)}</p></div></div>
+      ${table([{ l: 'Turnier' }, { l: 'Walk-On-Song' }], a.entries.slice().reverse().map((e) =>
+        `<tr><td>${tLink(e.t)}</td><td>${e.t.walkOns[a.name] ? esc(e.t.walkOns[a.name]) : '<span class="muted">unbekannt</span>'}</td></tr>`), 'compact')}`;
+    const excuses = a.excuses.length
+      ? `<ul class="excuse-list">${a.excuses.slice().reverse().map((x) => `<li><span class="muted">${esc(x.t.title)}:</span> „${esc(x.text)}“</li>`).join('')}</ul>`
+      : '<p class="muted">Noch keine offizielle Ausrede dokumentiert.</p>';
+
     return `
     ${pageHead(a.founder ? '👑 Gründungsmitglied' : 'Spielerprofil', esc(a.name), '',
-      `<div class="chips">${a.titles ? `<span class="chip chip-y">🏆 ${a.titles}× Turniersieger</span>` : ''}${a.ballon ? `<span class="chip">🎈 ${a.ballon}× Ballon Dart</span>` : ''}${a.hosted ? `<span class="chip">🏠 ${a.hosted}× Ausrichter</span>` : ''}</div>`)}
+      `${P.photo ? `<img class="profile-photo" src="${esc(P.photo)}" alt="${esc(a.name)}">` : ''}<div class="chips">${a.titles ? `<span class="chip chip-y">🏆 ${a.titles}× Turniersieger</span>` : ''}${a.ballon ? `<span class="chip">🎈 ${a.ballon}× Ballon Dart</span>` : ''}${a.hosted ? `<span class="chip">🏠 ${a.hosted}× Ausrichter</span>` : ''}</div>`)}
     <section class="wrap kpis kpis-6">${tiles}</section>
+    <section class="wrap section split">
+      <div class="panel">${sectionHead('Über den Spieler', 'Steckbrief')}${steckbrief}</div>
+      <div class="panel">${sectionHead('Automatisch ermittelt', 'Fakten')}${autoFacts}</div>
+    </section>
     ${records ? `<section class="wrap section">${sectionHead('Persönliche', 'Bestwerte')}<div class="records">${records}</div></section>` : ''}
+    <section class="wrap section split">
+      <div class="panel">${sectionHead('Auf die Bühne', 'Walk-On')}${walkOn}</div>
+      <div class="panel">${sectionHead('Eine-Ausrede-Regel', 'Ausreden-Archiv')}${excuses}</div>
+    </section>
     <section class="wrap section">
       ${sectionHead('Karriere', 'Turnierhistorie')}
       ${history}
@@ -844,6 +955,40 @@
   /* =========================================================
      Start
      ========================================================= */
+  function startClock() {
+    const box = $('#ea-clock');
+    if (!box) return;
+    const at = (date, time) => { const d = parseDate(date); if (time) { const [h, m] = time.split(':').map(Number); d.setHours(h, m || 0, 0, 0); } return d; };
+    const next = D.nextTournament && D.nextTournament.date ? D.nextTournament : null;
+    const last = at(LATEST.date, LATEST.time);
+    const deadline = new Date(last); deadline.setMonth(deadline.getMonth() + 6);
+    const target = next ? at(next.date, next.time) : last;
+    $('#ea-clock-title').textContent = next ? `Countdown bis EA Masters ${roman(LATEST.nr + 1)}` : `Seit dem letzten Turnier (${LATEST.title})`;
+    const tick = () => {
+      const now = new Date();
+      let diff = Math.max(0, next ? target - now : now - target);
+      const d = Math.floor(diff / 864e5); diff -= d * 864e5;
+      const h = Math.floor(diff / 36e5); diff -= h * 36e5;
+      const m = Math.floor(diff / 6e4);
+      $('#ea-d').textContent = d; $('#ea-h').textContent = h; $('#ea-m').textContent = m;
+      const note = $('#ea-clock-note');
+      if (next) {
+        note.innerHTML = `${dateLong(next.date)}${next.time ? ', ' + esc(next.time) + ' Uhr' : ''}${next.venue ? ' · ' + esc(next.venue) : ''}${next.host ? ' · Ausrichter: ' + esc(next.host) : ''}`;
+        box.classList.remove('overdue');
+      } else if (now > deadline) {
+        const over = Math.floor((now - deadline) / 864e5);
+        note.innerHTML = `⚠️ Die 6-Monats-Frist ist seit <strong>${over} ${over === 1 ? 'Tag' : 'Tagen'}</strong> abgelaufen. ${esc(LATEST.winner)}, wir warten.`;
+        box.classList.add('overdue');
+      } else {
+        const left = Math.ceil((deadline - now) / 864e5);
+        note.innerHTML = `Laut Regelwerk muss das nächste Turnier spätestens in <strong>${left} Tagen</strong> stattfinden.`;
+        box.classList.remove('overdue');
+      }
+    };
+    tick();
+    setInterval(tick, 15000);
+  }
+
   function init() {
     renderChrome();
     const page = document.body.dataset.page;
@@ -851,6 +996,7 @@
     const R = { home: renderHome, turniere: renderTurniere, turnier: renderTurnier, statistiken: renderStatistiken, spieler: renderSpieler };
     if (app && R[page]) app.innerHTML = R[page]();
     if (page === 'verein') fillVerein();
+    if (page === 'home') startClock();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

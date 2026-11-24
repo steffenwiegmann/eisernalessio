@@ -60,15 +60,25 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 
 ## Druckvorlagen (Turnierpläne)
 
-- `druck/` enthält Word-Turnierpläne (`EA-Masters-Turnierplan-<n>-Spieler.docx`, 4–8 Spieler, je genau 2 A4-Seiten: Turnierplan + Ergebnisse/Statistik) zum Ausdrucken und Ausfüllen per Hand.
+- `druck/` enthält Word-Turnierpläne (`EA-Masters-Turnierplan-<n>-Spieler.docx`, 4–8 Spieler, je genau 3 A4-Seiten: Turnierplan + Ergebnisse/Statistik + Autodarts-Protokoll (Darts und Ø je Spieler und Match)) zum Ausdrucken und Ausfüllen per Hand.
 - Erzeugt von `cd druck && npm install && node generate-word.js` (npm-Paket `docx`) aus den Formaten in `FORMATS`. Die .docx nicht von Hand ändern, sondern Generator anpassen und neu erzeugen.
-- Nach Änderungen prüfen, dass jede Datei genau 2 Seiten hat (z. B. per Word-COM `ComputeStatistics(2)` in PowerShell und PDF-Export).
+- Nach Änderungen prüfen, dass jede Datei genau 3 Seiten hat (Regelwerk: 2) (z. B. per Word-COM `ComputeStatistics(2)` in PowerShell und PDF-Export).
 - Statistik-Tabellen auf Blatt 2 entsprechen der bisherigen Word-Vorlage: „Statistiken – Gesamtturnier“ (Spieler, 3-Darts Avg, Highest Score, Checkout, Highest Checkout, Minimum Darts (Avg)) und „Bestwerte des Turniers“ (Kategorie, Wert, Spieler).
 - Modus ist immer fest **501 · Double Out · Legmodus**. „Best of ____“ bleibt leer zum Eintragen und heißt überall gleich (nie „BO“).
 - Vor dem Neuerzeugen prüfen, ob die vorhandenen .docx von Hand geändert wurden (Text mit frisch erzeugter Version vergleichen) und Änderungen erst ins Skript übernehmen – sonst gehen sie verloren.
 - Formate: 4 = 1 Gruppe Hin+Rück · 5 = 1 Gruppe einfach · 6 = 2×3 Hin+Rück · 7 = 4er einfach + 3er Hin+Rück · 8 = 2×4 einfach. Platzierungsspiele stehen immer in der Reihenfolge Platz 7 → Platz 5 → Platz 3 (vom Turnierleiter so festgelegt, nicht umdrehen). Danach Halbfinale (1.–4./2.–3. bzw. „1. A – 2. B“/„1. B – 2. A“), Platz 3, ggf. Platz 5 („3. A – 3. B“)/7, Finale. In der Endrunde immer „Platz. Gruppe“ schreiben, nie „A1“ (das sind die Spielerplätze in der Gruppe). Bei einer Gruppe heißen die Spieler A–E.
+- Regelwerk als Word: `cd druck && node rules-word.js` → `druck/EA-Masters-Regeln.docx`. Texte in `rules-word.js` müssen wortgleich mit `eamastersrules.html` bleiben (bei Regeländerungen beide anpassen).
 - Ausgefüllte Ergebnis-Dokumente je Turnier: `cd druck && node fill-word.js [nr]` → `druck/ausgefuellt/EA-Masters-<röm>-Ergebnisse.docx` (füllt die Vorlage mit Daten aus `js/data.js`; Vorlagen selbst bleiben unverändert).
 - Ausgefüllte Bögen (Foto/Scan) werden in `js/data.js` übertragen: Gruppenspiele → `groupMatches`, Tabellen → `groups`, Endrunde → `knockout`, Blatt 2 „Statistiken – Gesamtturnier“ → `stats` (Checkout als `coHit`/`coAtt`, Minimum Darts → `minDarts`), Ballon Dart → `ballonDart`.
+
+## Spielerprofile, Ereignisse, Uhr
+
+- Steckbrief-Felder pro Spieler in `players` (data.js): photo, nickname, walkOn (aktuell), favDouble, dreamFinish, hand, darts, motto, ritual, favPlayer. Leer = „noch nicht hinterlegt“.
+- Pro Turnier: `walkOns` (Songs dieses Turniers → Walk-On-Historie im Profil), `excuses` (Ausreden-Archiv), `events` (180 / robinhood / 9darter), optional `time`.
+- Matches können `n1`/`n2` (Darts laut Autodarts) haben → exakter Turnier-Average wird berechnet und ersetzt stats.avg.
+- Automatisch: Dabei seit, Erzrivale (meiste Duelle), Angstgegner (meiste Niederlagen bei negativer Bilanz).
+- `nextTournament` in data.js → Startseite zeigt Countdown statt „Seit dem letzten Turnier“ (inkl. Hinweis auf überschrittene 6-Monats-Frist).
+- Regeln: 15 Stück (inkl. Titelverteidiger-Bürde, 9-Darter-Klausel, Ballon-Dart-Regel), wortgleich in eamastersrules.html und druck/rules-word.js.
 
 ## Datenhinweise
 
@@ -83,4 +93,4 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 - Änderungen lokal machen, mit `node .claude/serve.js` im Browser prüfen (auch Handy-Breite), dann committen und auf `main` pushen.
 - Commit-Messages kurz auf Deutsch.
 - Vor dem Push: Seiten auf JS-Fehler prüfen (Konsole) und sicherstellen, dass interne Links funktionieren.
-- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=3`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.
+- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=4`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.
