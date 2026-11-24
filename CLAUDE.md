@@ -1,0 +1,73 @@
+# Eisern Alessio – Website
+
+Statische Website des Dart-Freundeskreises **Eisern Alessio** mit der internen Turnierserie **EA Masters** (Turniere, Ergebnisse, Statistiken, Regeln).
+
+- Repository: https://github.com/steffenwiegmann/eisernalessio (Branch `main`)
+- Live (GitHub Pages): https://steffenwiegmann.github.io/eisernalessio/
+
+## Tech-Stack
+
+- Statisches HTML + `style.css` + Vanilla-JavaScript. Kein Build, kein Framework, keine npm-Abhängigkeiten.
+- Schriften: Google Fonts (Bebas Neue für Überschriften, Inter für Text).
+- Deployment: GitHub Pages direkt aus `main` (Root). Ein Push auf `main` ist automatisch live (nach ca. 1–2 Minuten).
+- Lokale Vorschau: `node .claude/serve.js` → http://localhost:8000 (Python ist auf diesem PC nicht installiert).
+
+## Architektur: datengetrieben
+
+**Alle Turnierdaten stehen ausschließlich in `js/data.js`** (`window.EA_DATA`). `js/app.js` erzeugt daraus Header, Footer und alle dynamischen Seiten. Statistiken, Ewige Tabelle, Rekorde, Spielerprofile und Head-to-Head werden automatisch berechnet.
+
+| Datei | Inhalt |
+|---|---|
+| `index.html` | Startseite (Pokalhalter, Kennzahlen, letztes Turnier, Ehrentafel) – `data-page="home"` |
+| `eamasters.html` | Turnierübersicht als Zeitstrahl – `data-page="turniere"` |
+| `turnier.html?nr=N` | Turnierdetail (Podium, Endrunde, Gruppen, Statistiken) – `data-page="turnier"` |
+| `statistiken.html` | Ehrentafel, Rekorde, Ewige Tabelle, Ranglisten – `data-page="statistiken"` |
+| `spieler.html[?name=X]` | Spielerliste bzw. Spielerprofil – `data-page="spieler"` |
+| `eamastersrules.html` | Regeln (statisches HTML) – `data-page="regeln"` |
+| `club.html` | Verein (statischer Text, Spielerlisten per JS) – `data-page="verein"` |
+| `eamastersi.html` … `eamastersiv.html` | Nur Weiterleitungen auf `turnier.html?nr=…` (alte Links bleiben gültig) |
+| `js/data.js` | **Einzige Datenquelle** |
+| `js/app.js` | Rendering + Berechnungen |
+| `style.css` | Design-System |
+| `assets/favicon.svg` | Dartscheiben-Icon |
+
+Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<main>`) und `<div id="site-footer">`. Navigation wird zentral in `NAV` in `js/app.js` gepflegt.
+
+## Neues Turnier hinzufügen
+
+1. In `js/data.js` den letzten Turnierblock kopieren, `nr` hochzählen, Daten eintragen.
+2. Unbekannte Felder einfach weglassen – die Seiten blenden sie aus (Feldbeschreibung steht oben in `data.js`).
+3. Zahlen mit Punkt (`41.73`), Datum als `'JJJJ-MM-TT'`. Anzeige erfolgt automatisch deutsch.
+4. **Keine** neue HTML-Datei nötig – Übersicht, Startseite und Statistiken aktualisieren sich selbst.
+5. Kontrollrechnung: Gruppentabellen gegen die Gruppenspiele prüfen, Checkout-Summen gegen Matchwerte.
+
+## Design
+
+- Gelb-Schwarz: `--yellow #ffd400` auf `--bg #0b0b0b`, Flächen `--surface #161616`. Alle Farben als CSS-Variablen in `:root` von `style.css`.
+- Medaillenfarben (Gold/Silber/Bronze) nur für Platzierungen.
+- **Dark/Light-Toggle** (Sonne/Mond im Header): Dark ist Standard. Light = `:root[data-theme="light"]` in `style.css`, Wahl in `localStorage` (`ea-theme`). Jede Seite hat im `<head>` ein Mini-Skript, das das Theme vor dem Rendern setzt (gegen Aufblitzen) – bei neuen Seiten mitkopieren.
+- Light Mode nur Weiß/Grau/Schwarz + Gelb: Gelb nur als Fläche oder Markierung (Textmarker, Unterstreichung, Balken), Akzenttext ist schwarz (`--accent-ink`). Header und Footer bleiben in beiden Modi schwarz. Keine weiteren Farben (kein Grün/Blau).
+- Neue Farben immer als Variable anlegen und für beide Modi definieren.
+- Gelb-schwarzer Warnstreifen (`.hazard`) unter Header und über Footer als Markenelement.
+- Mobile: Breakpoints 980px, 860px (Burger-Menü), 640px. Keine horizontale Seiten-Scrollbar; breite Tabellen scrollen in `.table-wrap`.
+- Styles gehören in `style.css`, keine Inline-Styles (Ausnahme: `--w` für Balkenbreiten).
+
+## Inhalt & Sprache
+
+- Alle Texte auf **Deutsch**, locker-humorvoller Ton (siehe Regeln-Seite).
+- Spielernamen sind Spitznamen: Katsche, Otter, Quaasus, Sweaty (Gründungsmitglieder, `founder: true`), Killernini, Hugo, Fynn, Samier, Reto – Schreibweise exakt beibehalten.
+- Regel: Der Turniersieger richtet das nächste Turnier aus (wird auf Start- und Turnierseite angezeigt).
+
+## Datenhinweise
+
+- Masters II: nur Endrunde und Platzierungen bekannt, keine Gruppen- oder Spielerstatistik.
+- Masters I, Platz 3 wurde als Dreier-Spiel (Otter, Quaasus, Killernini) ausgespielt → als Textmatch erfasst.
+- Masters III: Die Originalseite nannte bei den Bestwerten für Fynn „55,03“, in der Spielertabelle „53,03“. Verwendet wird 53,03 (Bestwerte werden jetzt berechnet).
+- Masters I: Otter in der Gruppentabelle auf 3-1 Legs korrigiert (laut Einzelspielen; Original zeigte 2-2).
+- Masters IV: Katsches Checkout auf 9/60 korrigiert (Summe der Matches; Original zeigte 9/160 bei 15 %).
+
+## Arbeitsweise
+
+- Änderungen lokal machen, mit `node .claude/serve.js` im Browser prüfen (auch Handy-Breite), dann committen und auf `main` pushen.
+- Commit-Messages kurz auf Deutsch.
+- Vor dem Push: Seiten auf JS-Fehler prüfen (Konsole) und sicherstellen, dass interne Links funktionieren.

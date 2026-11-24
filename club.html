@@ -2,33 +2,67 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>CLub</title>
+    <script>try{if(localStorage.getItem('ea-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verein · Eisern Alessio</title>
+    <meta name="description" content="Der Verein Eisern Alessio: Leidenschaft, Gemeinschaft und sportlicher Ehrgeiz an der Dartscheibe.">
+    <meta name="theme-color" content="#0b0b0b">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="style.css">
+    <script src="js/data.js" defer></script>
+    <script src="js/app.js" defer></script>
 </head>
-<body>
+<body data-page="verein">
+<div id="site-header"></div>
 
-<header>Verein</header>
+<main>
+    <section class="page-head">
+        <div class="wrap">
+            <p class="kicker">Über uns</p>
+            <h1 class="display">Unser <span class="hl">Verein</span></h1>
+            <p class="lead">Der Verein Eisern Alessio steht für Leidenschaft, Gemeinschaft und sportlichen Ehrgeiz. Hier treffen sich Freunde, um gemeinsam Darts zu spielen, Turniere zu veranstalten und eine gute Zeit zu haben.</p>
+        </div>
+    </section>
 
-<nav>
-    <a href="index.html">Start</a>
-</nav>
+    <section class="wrap section">
+        <div class="values">
+            <div class="value">
+                <div class="v-icon" aria-hidden="true">🔥</div>
+                <h3>Leidenschaft</h3>
+                <p>Jeder Pfeil zählt – ob 180 oder Bouncer. Hauptsache, mit vollem Einsatz.</p>
+            </div>
+            <div class="value">
+                <div class="v-icon" aria-hidden="true">🍻</div>
+                <h3>Gemeinschaft</h3>
+                <p>Neben dem sportlichen Wettbewerb steht vor allem der Spaß im Vordergrund.</p>
+            </div>
+            <div class="value">
+                <div class="v-icon" aria-hidden="true">🏆</div>
+                <h3>Ehrgeiz</h3>
+                <p>Der Wanderpokal wandert – aber niemand gibt ihn freiwillig her.</p>
+            </div>
+        </div>
+    </section>
 
-<div class="container">
-    <h1>Unser Verein</h1>
+    <section class="wrap section">
+        <div class="section-head"><div><p class="kicker">👑 Seit dem ersten Turnier</p><h2>Gründungsmitglieder</h2></div></div>
+        <div class="player-grid" id="founders"></div>
+    </section>
 
-    <p>
-        Der Verein Eisern Alessio steht für Leidenschaft, Gemeinschaft und sportlichen Ehrgeiz.
-    </p>
+    <section class="wrap section">
+        <div class="section-head"><div><p class="kicker">Verstärkung am Oche</p><h2>Weitere Spieler</h2></div></div>
+        <div class="player-grid" id="members"></div>
+    </section>
 
-    <p>
-        Hier treffen sich Freunde, um gemeinsam Dart zu spielen, Turniere zu veranstalten
-        und eine gute Zeit zu haben.
-    </p>
+    <section class="wrap section">
+        <div class="section-head"><div><p class="kicker">Chronik</p><h2>Unsere Turniere</h2></div><a class="more" href="eamasters.html">Zur Übersicht →</a></div>
+        <div class="tour-grid" id="chronik"></div>
+    </section>
+</main>
 
-    <p>
-        Neben dem sportlichen Wettbewerb steht vor allem der Spaß im Vordergrund.
-    </p>
-</div>
-
+<div id="site-footer"></div>
 </body>
 </html>

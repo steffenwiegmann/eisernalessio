@@ -2,61 +2,130 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>EA Masters Regeln</title>
-    <link rel="stylesheet" href="style.css">
+    <script>try{if(localStorage.getItem('ea-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regeln · Eisern Alessio Masters</title>
+    <meta name="description" content="Die offiziellen und heiligen Regeln der Eisern Alessio Masters.">
+    <meta name="theme-color" content="#0b0b0b">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <script src="js/data.js" defer></script>
+    <script src="js/app.js" defer></script>
 </head>
-<body>
+<body data-page="regeln">
+<div id="site-header"></div>
 
-<header>📜 Eisern Alessio Masters – Regeln</header>
+<main>
+    <section class="page-head">
+        <div class="wrap">
+            <p class="kicker">Das offizielle Regelwerk</p>
+            <h1 class="display">Die heiligen <span class="hl">Regeln</span></h1>
+            <p class="lead">Was am Oche gilt, steht hier. Unverhandelbar, traditionsbewusst und mit einem Augenzwinkern – so wie es die Gründungsmitglieder vorgesehen haben.</p>
+        </div>
+    </section>
 
-<nav>
-    <a href="eamasters.html">Zurück zur Übersicht</a>
-</nav>
+    <section class="wrap section">
+        <div class="founders-band">
+            <div class="crown" aria-hidden="true">👑</div>
+            <div>
+                <p class="kicker">Präambel</p>
+                <h2>Die ehrwürdigen Gründungsmitglieder</h2>
+                <p>Sie sind Hüter der Regeln, Bewahrer der Tradition und dürfen jederzeit mit dem Satz beginnen: <span class="hl">„Also damals, beim ersten Turnier …“</span></p>
+                <div class="chips">
+                    <a class="chip chip-link" href="spieler.html?name=Katsche">Katsche</a>
+                    <a class="chip chip-link" href="spieler.html?name=Otter">Otter</a>
+                    <a class="chip chip-link" href="spieler.html?name=Quaasus">Quaasus</a>
+                    <a class="chip chip-link" href="spieler.html?name=Sweaty">Sweaty</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="container">
+    <section class="wrap section">
+        <div class="section-head"><div><p class="kicker">Turnierbetrieb</p><h2>Organisation &amp; Modus</h2></div></div>
+        <div class="rules">
+            <article class="rule rule-key">
+                <div class="rule-icon" aria-hidden="true">🏆</div>
+                <h3>Der heilige Wanderpokal</h3>
+                <p>Der Sieger des Turniers erhält den ehrwürdigen Wanderpokal.</p>
+                <p>Der Gewinner verpflichtet sich, das nächste Turnier auszurichten. Der Spielort ist frei wählbar.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">👥</div>
+                <h3>Mindestteilnehmerzahl</h3>
+                <p>Mindestens 4 Spieler müssen teilnehmen, davon mindestens 2 Gründungsmitglieder.</p>
+                <p class="quote">„Das Brett war früher härter und die Pfeile dicker.“</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">📲</div>
+                <h3>Einladungspflicht</h3>
+                <p>Alle bisherigen Teilnehmer müssen eingeladen werden.</p>
+                <p>Offizielle Kommunikation ausschließlich über die heilige WhatsApp-Gruppe.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🗂️</div>
+                <h3>Turniermodus</h3>
+                <ul>
+                    <li><strong>4–5 Spieler:</strong> 1 Gruppe, danach Halbfinals und Platzierungsspiele</li>
+                    <li><strong>6–8 Spieler:</strong> 2 Gruppen, danach Halbfinals und Platzierungsspiele</li>
+                </ul>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">⏳</div>
+                <h3>Turnier-Intervall</h3>
+                <p>Zwischen zwei Turnieren liegen mindestens 2 Wochen und höchstens 6 Monate.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🎯</div>
+                <h3>Zugelassenes Material</h3>
+                <p>Nur normale, glatte Spitzen – keine Hightech-Konstruktionen.</p>
+            </article>
+        </div>
+    </section>
 
-<h1>Regeln der Eisern Alessio Masters</h1>
+    <section class="wrap section">
+        <div class="section-head"><div><p class="kicker">Am Oche</p><h2>Ehre &amp; Tradition</h2></div></div>
+        <div class="rules">
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🤝</div>
+                <h3>Gentleman’s Agreement</h3>
+                <p>Respektvoller Umgang, Handschlag vor und nach jedem Spiel.</p>
+                <p>Sticheleien sind erlaubt, Beleidigungen bitte kreativ.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🎵</div>
+                <h3>Die Walk-On-Pflicht</h3>
+                <p>Jeder wählt seinen eigenen Walk-On-Song. Wer keinen Song nennt, für den entscheidet der Ausrichter.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">💥</div>
+                <h3>Die 180-Eskalationsregel</h3>
+                <p>Wird eine 180 geworfen, stehen alle auf und applaudieren – oder zollen zumindest anerkennend Respekt.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🏹</div>
+                <h3>Die Robin-Hood-Regel</h3>
+                <p>Robin Hood? Das Spiel wird unterbrochen, der Werfer darf feiern und alle zollen Respekt.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🚑</div>
+                <h3>Die Dartitis-Regel</h3>
+                <p>Diagnostizierte Dartitis bedeutet: kein Turnier.</p>
+                <p>Tritt sie während des Turniers auf, ist das Spiel verloren.</p>
+            </article>
+            <article class="rule">
+                <div class="rule-icon" aria-hidden="true">🤷</div>
+                <h3>Die Eine-Ausrede-Regel</h3>
+                <p>Jeder darf eine offizielle Ausrede pro Turnier nutzen. Doppelausreden sind verboten.</p>
+                <p class="quote">Wer ohne Ausrede verliert, verliert seine Würde.</p>
+            </article>
+        </div>
+    </section>
+</main>
 
-<h2>👑 Die ehrwürdigen Gründungsmitglieder</h2>
-<p>Katsche, Otter, Quaasus, Sweaty – sie sind Hüter der Regeln, Bewahrer der Tradition und dürfen jederzeit mit dem Satz beginnen: „Also damals, beim ersten Turnier …“</p>
-
-<h2>🏆 Der heilige Wanderpokal</h2>
-<p>Der Sieger des Turniers erhält den ehrwürdigen Wanderpokal. Der Gewinner verpflichtet sich, das nächste Turnier auszurichten. Spielort frei wählbar.</p>
-
-<h2>👥 Mindestteilnehmerzahl</h2>
-<p>Mindestens 4 Spieler müssen teilnehmen, davon mindestens 2 Gründungsmitglieder. Tradition wahren: „Das Brett war früher härter und die Pfeile dicker.“</p>
-
-<h2>📲 Einladungspflicht</h2>
-<p>Alle bisherigen Teilnehmer müssen eingeladen werden. Offizielle Kommunikation ausschließlich über die heilige WhatsApp-Gruppe.</p>
-
-<h2>🏆 Turniermodus</h2>
-<p>4–5 Spieler: 1 Gruppe, dann Halbfinals/Platzierungsspiele. 6–8 Spieler: 2 Gruppen, dann Halbfinals/Platzierungsspiele.</p>
-
-<h2>⏳ Turnier-Intervall</h2>
-<p>Zwischen Turnieren: min. 2 Wochen, max. 6 Monate.</p>
-
-<h2>🤝 Gentleman’s Agreement</h2>
-<p>Respektvoller Umgang, Handschlag vor und nach jedem Spiel. Sticheleien erlaubt, Beleidigungen kreativ.</p>
-
-<h2>🎯 Zugelassenes Material</h2>
-<p>Nur normale, glatte Spitzen – keine Hightech-Konstruktionen.</p>
-
-<h2>🚑 Die Dartitis-Regel</h2>
-<p>Diagnostizierte Dartitis → kein Turnier. Während Turnier auftretend → Spiel verloren.</p>
-
-<h2>🎵 Die Walk-On-Pflicht</h2>
-<p>Eigenen Walk-On-Song wählen. Wer keinen Song nennt, entscheidet der Ausrichter.</p>
-
-<h2>🏹 Die Robin-Hood-Regel</h2>
-<p>Robin Hood → Spiel unterbrochen, Werfer darf feiern, alle zollen Respekt.</p>
-
-<h2>💥 Die 180-Eskalationsregel</h2>
-<p>180 geworfen → alle stehen auf, applaudieren oder anerkennen.</p>
-
-<h2>🤷‍♂️ Die Eine-Ausrede-Regel</h2>
-<p>Jeder darf eine offizielle Ausrede pro Turnier. Doppelausreden verboten. Wer ohne Ausrede verliert, verliert Würde.</p>
-
-</div>
+<div id="site-footer"></div>
 </body>
 </html>
