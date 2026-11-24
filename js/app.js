@@ -330,9 +330,9 @@
     const legs = SCORED.reduce((s, m) => s + m.s1 + m.s2, 0);
     const hs = best(STAT_ROWS.map((s) => ({ v: s.hs, p: s.p })), 'max');
     const rulesTeaser = [
-      ['🏆', 'Der heilige Wanderpokal', 'Wer gewinnt, richtet das nächste Turnier aus.'],
-      ['💥', 'Die 180-Eskalationsregel', 'Bei einer 180 stehen alle auf und zollen Respekt.'],
-      ['🤷', 'Die Eine-Ausrede-Regel', 'Eine offizielle Ausrede pro Turnier. Nicht mehr.']
+      ['🏆', 'Der heilige Wanderpokal', 'Der Gewinner verpflichtet sich, das nächste Turnier auszurichten.'],
+      ['💥', 'Die 180-Eskalationsregel', 'Bei einer geworfenen 180 stehen alle Anwesenden auf.'],
+      ['🤷‍♂️', 'Die Eine-Ausrede-Regel', 'Doppelausreden sind verboten – „Schulter UND Bier“ zählt nicht.']
     ];
     return `
     <section class="hero">
@@ -573,7 +573,7 @@
               <h3>${esc(g.name)}</h3>
               ${table(head, rows, 'standings')}
               ${g.tiebreak ? `<p class="sub-h">Entscheidungsspiel</p>${matchTable(g.tiebreak)}` : ''}
-              ${gm.length ? `<details class="more-matches"><summary>Alle Gruppenspiele (${gm.length})</summary>${matchTable(gm)}</details>` : ''}
+              ${gm.length ? `<p class="sub-h">Gruppenspiele (${gm.length})</p>${matchTable(gm)}` : ''}
             </div>`;
           }).join('')}
         </div>

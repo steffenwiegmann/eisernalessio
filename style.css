@@ -632,7 +632,9 @@ tr.lead-row td { background: var(--yellow-soft); }
 .founders-band .crown { font-size: 54px; line-height: 1; }
 .founders-band h2 { font-size: clamp(28px, 4vw, 38px); }
 .founders-band p { color: var(--muted); margin: 8px 0 0; }
-.founders-band .chips { margin-top: 14px; }
+.founders-band .chips { margin: 14px 0 4px; }
+.founders-band .quote { color: var(--accent-ink); font-style: italic; font-weight: 600; }
+:root[data-theme="light"] .founders-band .quote { border-left: 3px solid var(--yellow); padding-left: 10px; }
 
 .rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; counter-reset: rule; }
 .rule {
