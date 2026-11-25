@@ -74,7 +74,7 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 ## Spielerprofile, Ereignisse, Uhr
 
 - Steckbrief-Felder pro Spieler in `players` (data.js): photo, nickname, walkOn, favDouble, dreamFinish, hand, darts, favPlayer. Leer = „noch nicht hinterlegt“.
-- Pro Turnier: `events` (180 / robinhood / 9darter), optional `time`. Walk-On nur ein Song pro Spieler im Steckbrief (keine Historie), kein Ausreden-Archiv.
+- Pro Turnier: `events` (180 / 9darter; Robin Hoods werden bewusst nicht erfasst), optional `time`. Walk-On nur ein Song pro Spieler im Steckbrief (keine Historie), kein Ausreden-Archiv.
 - Matches können `n1`/`n2` (Darts laut Autodarts) haben → exakter Turnier-Average wird berechnet und ersetzt stats.avg.
 - Automatisch: Dabei seit, Erzrivale (meiste Duelle), Angstgegner (meiste Niederlagen bei negativer Bilanz).
 - `nextTournament` in data.js → Startseite zeigt Countdown statt „Seit dem letzten Turnier“ (inkl. Hinweis auf überschrittene 6-Monats-Frist).
@@ -93,4 +93,4 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 - Änderungen lokal machen, mit `node .claude/serve.js` im Browser prüfen (auch Handy-Breite), dann committen und auf `main` pushen.
 - Commit-Messages kurz auf Deutsch.
 - Vor dem Push: Seiten auf JS-Fehler prüfen (Konsole) und sicherstellen, dass interne Links funktionieren.
-- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=8`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.
+- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=9`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.

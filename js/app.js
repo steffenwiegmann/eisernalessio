@@ -80,8 +80,8 @@
     });
   });
 
-  // Besondere Ereignisse (180er, Robin Hood, 9-Darter) je Turnier und Spieler
-  const EVENT_TYPES = { '180': { icon: '💥', label: '180' }, robinhood: { icon: '🏹', label: 'Robin Hood' }, '9darter': { icon: '✨', label: '9-Darter' } };
+  // Besondere Ereignisse (180er, 9-Darter) je Turnier und Spieler
+  const EVENT_TYPES = { '180': { icon: '💥', label: '180' }, '9darter': { icon: '✨', label: '9-Darter' } };
   function eventCount(t, p, type) {
     const n = t.events.filter((e) => e.type === type && e.p === p).length;
     if (type === '180') {
@@ -120,7 +120,7 @@
     AGG[n] = {
       name: n, founder: isFounder(n), entries: [], places: [], titles: 0, finals: 0, podiums: 0,
       avgs: [], avgChart: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
-      s180: 0, robinhood: 0, ninedarter: 0,
+      s180: 0, ninedarter: 0,
       profile: (D.players || {})[n] || {}
     };
   });
@@ -136,7 +136,6 @@
       const stat = t.stats.find((s) => s.p === p) || null;
       a.entries.push({ t, place, stat });
       a.s180 += eventCount(t, p, '180');
-      a.robinhood += eventCount(t, p, 'robinhood');
       a.ninedarter += eventCount(t, p, '9darter');
       a.places.push(place);
       if (place === 1) a.titles++;
@@ -787,7 +786,7 @@
       ${kpi('Matches', SCORED.length, 'mit bekanntem Ergebnis')}
       ${kpi('Legs', SCORED.reduce((s, m) => s + m.s1 + m.s2, 0))}
       ${kpi('💥 180er', players.reduce((s, a) => s + a.s180, 0), 'soweit erfasst')}
-      ${kpi('🏹 Robin Hoods', players.reduce((s, a) => s + a.robinhood, 0), 'soweit erfasst')}
+      ${kpi('🏆 Sieger', new Set(TOURS.map((t) => t.winner).filter(Boolean)).size, 'verschiedene Champions')}
     </section>
     <section class="wrap section">
       ${sectionHead('Hall of Fame', 'Ehrentafel')}
@@ -826,10 +825,10 @@
       </div>
       <div class="panel">
         ${sectionHead('Nebenschauplätze', 'Ehrungen &amp; Momente')}
-        ${table([{ l: 'Spieler' }, { l: '🏠', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: '🎈', cls: 'r', title: 'Ballon-Dart-Siege' }, { l: '💥 180', cls: 'r', title: '180er (soweit erfasst)' }, { l: '🏹 RH', cls: 'r', title: 'Robin Hoods (soweit erfasst)' }],
-          players.filter((a) => a.hosted || a.ballon || a.s180 || a.robinhood).sort((a, b) => (b.hosted + b.ballon + b.s180 + b.robinhood) - (a.hosted + a.ballon + a.s180 + a.robinhood))
-            .map((a) => `<tr><td>${pLink(a.name)}</td><td class="r num">${a.hosted}</td><td class="r num">${a.ballon}</td><td class="r num">${a.s180}</td><td class="r num">${a.robinhood}</td></tr>`), 'compact')}
-        <p class="muted small">🏠 Ausrichter · 🎈 Ballon Dart · 💥 180er · 🏹 Robin Hoods (RH)</p>
+        ${table([{ l: 'Spieler' }, { l: '🏠', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: '🎈', cls: 'r', title: 'Ballon-Dart-Siege' }, { l: '💥 180', cls: 'r', title: '180er (soweit erfasst)' }],
+          players.filter((a) => a.hosted || a.ballon || a.s180).sort((a, b) => (b.hosted + b.ballon + b.s180) - (a.hosted + a.ballon + a.s180))
+            .map((a) => `<tr><td>${pLink(a.name)}</td><td class="r num">${a.hosted}</td><td class="r num">${a.ballon}</td><td class="r num">${a.s180}</td></tr>`), 'compact')}
+        <p class="muted small">🏠 Ausrichter · 🎈 Ballon Dart · 💥 180er</p>
       </div>
     </section>`;
   }
@@ -922,7 +921,6 @@
       ['Erzrivale', a.rival ? `${pLink(a.rival.op)} <span class="muted">· ${a.rival.n} Duelle, Bilanz ${a.rival.w}–${a.rival.l}</span>` : '–'],
       ['Angstgegner', a.nemesis ? `${pLink(a.nemesis.op)} <span class="muted">· Bilanz ${a.nemesis.w}–${a.nemesis.l}</span>` : '<span class="muted">keiner – bisher</span>'],
       ['180er', `${a.s180} <span class="muted">· soweit erfasst</span>`],
-      ['Robin Hoods', `${a.robinhood} <span class="muted">· soweit erfasst</span>`],
       ...(a.ninedarter ? [['9-Darter', '✨ ' + a.ninedarter]] : [])
     ]);
     return `

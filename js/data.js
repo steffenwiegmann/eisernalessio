@@ -36,7 +36,7 @@
  *
  *  Weitere Felder pro Turnier (alle optional):
  *    time     Startzeit 'HH:MM' (für die Uhr „Seit dem letzten Turnier“)
- *    events   [ { type: '180' | 'robinhood' | '9darter', p: 'Spieler', note: '…' } ]
+ *    events   [ { type: '180' | '9darter', p: 'Spieler', note: '…' } ]
  *
  *  Felder pro Spieler in `players` (alle optional, leer = „noch nicht hinterlegt“):
  *    founder       true bei Gründungsmitgliedern
@@ -59,7 +59,7 @@
 
 window.EA_DATA = {
   players: {
-    Katsche:    { founder: true, photo: '', nickname: 'Kommt von der Legende Katsche Schwarzenbeck', walkOn: 'Katchi', favDouble: 'D20', dreamFinish: 'Champagne Finish', hand: 'Rechts', darts: 'RED DRAGON Razor 24g', favPlayer: 'Gary Anderson', favWalkOn: '„Shut Up and Dance“ (Michael Smith)', favNickname: 'The Kirkulator' },
+    Katsche:    { founder: true, photo: '', nickname: 'Kommt von der Legende Katsche Schwarzenbeck', walkOn: 'Katchi', favDouble: 'D20', dreamFinish: 'Tops Tops', hand: 'Rechts', darts: 'RED DRAGON Razor 24g', favPlayer: 'Gary Anderson', favWalkOn: '„Shut Up and Dance“ (Michael Smith)', favNickname: 'The Kirkulator' },
     Otter:      { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
     Quaasus:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
     Sweaty:     { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
