@@ -178,6 +178,8 @@
     a.rival = h.slice().sort((x, y) => y.n - x.n || Math.abs(x.w - x.l) - Math.abs(y.w - y.l))[0] || null;
     // Angstgegner: meiste Niederlagen (nur wenn die Bilanz negativ ist)
     a.nemesis = h.filter((x) => x.l > x.w).sort((x, y) => y.l - x.l || (x.w - x.l) - (y.w - y.l))[0] || null;
+    // Lieblingsgegner: meiste Siege (nur wenn die Bilanz positiv ist)
+    a.favOpp = h.filter((x) => x.w > x.l).sort((x, y) => y.w - x.w || (y.w - y.l) - (x.w - x.l))[0] || null;
   });
 
   // Rekord-Suche: liefert Bestwert + alle Halter
@@ -920,6 +922,7 @@
       ['Dabei seit', a.since ? `${tLink(a.since)} <span class="muted">· ${dateShort(a.since.date)}</span>` : '–'],
       ['Erzrivale', a.rival ? `${pLink(a.rival.op)} <span class="muted">· ${a.rival.n} Duelle, Bilanz ${a.rival.w}–${a.rival.l}</span>` : '–'],
       ['Angstgegner', a.nemesis ? `${pLink(a.nemesis.op)} <span class="muted">· Bilanz ${a.nemesis.w}–${a.nemesis.l}</span>` : '<span class="muted">keiner – bisher</span>'],
+      ['Lieblingsgegner', a.favOpp ? `${pLink(a.favOpp.op)} <span class="muted">· Bilanz ${a.favOpp.w}–${a.favOpp.l}</span>` : '<span class="muted">noch keiner</span>'],
       ['180er', String(a.s180)],
       ...(a.ninedarter ? [['9-Darter', '✨ ' + a.ninedarter]] : [])
     ]);
