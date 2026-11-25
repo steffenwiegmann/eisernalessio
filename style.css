@@ -513,6 +513,13 @@ p { margin: 0 0 1em; }
 .record-who { font-size: 15px; line-height: 1.5; }
 .record-who .muted { font-size: 13px; }
 .record-sub { color: var(--faint); font-size: 12px; margin-top: 4px; }
+/* Single Out (Masters I–III): neutral gekennzeichnet, zählt nicht in Averages/Rekorde */
+.badge-so { margin-left: 0; background: transparent; border-color: var(--border-strong); color: var(--muted); font-size: 10px; vertical-align: 1px; }
+.note-so { color: var(--muted); font-size: 14px; margin: -4px 0 16px; }
+.note-so .badge-so { margin-right: 6px; }
+.records-so .record { border-style: dashed; }
+.chart .pt-so .dot { fill: var(--surface); stroke: var(--yellow); stroke-width: 2.5; }
+
 
 /* =========================================================
    Tabellen
@@ -839,6 +846,7 @@ img.avatar { object-fit: cover; padding: 0; }
 :root[data-theme="light"] .mini-bar span { background: #2a2a2a; }
 :root[data-theme="light"] .chart .line { stroke: #111111; }
 :root[data-theme="light"] .chart .dot { fill: var(--yellow); stroke: #111111; }
+:root[data-theme="light"] .chart .pt-so .dot { fill: #ffffff; stroke: #111111; }
 
 /* =========================================================
    Responsive

@@ -48,6 +48,8 @@
  *    hand          Wurfhand
  *    darts         Darts (Marke, Gewicht)
  *    favPlayer     Lieblingsspieler
+ *    favWalkOn     Lieblings-Walk-On (eines Profis), z. B. '„Shut Up and Dance“ (Michael Smith)'
+ *    favNickname   Lieblingsspitzname (eines Profis), z. B. 'The Kirkulator'
  *
  *  nextTournament: Sobald das nächste Turnier geplant ist, z. B.
  *    { date: '2026-12-12', time: '18:00', venue: 'Bovenden', host: 'Fynn' }
@@ -57,15 +59,15 @@
 
 window.EA_DATA = {
   players: {
-    Katsche:    { founder: true, photo: '', nickname: 'Kommt von der Legende Katsche Schwarzenbeck', walkOn: 'Katchi', favDouble: 'D20', dreamFinish: 'Champagne Finish', hand: 'Rechts', darts: 'RED DRAGON Razor 24g', favPlayer: 'Gary Anderson' },
-    Otter:      { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Quaasus:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Sweaty:     { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Killernini: { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Hugo:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Fynn:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Samier:     { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' },
-    Reto:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '' }
+    Katsche:    { founder: true, photo: '', nickname: 'Kommt von der Legende Katsche Schwarzenbeck', walkOn: 'Katchi', favDouble: 'D20', dreamFinish: 'Champagne Finish', hand: 'Rechts', darts: 'RED DRAGON Razor 24g', favPlayer: 'Gary Anderson', favWalkOn: '„Shut Up and Dance“ (Michael Smith)', favNickname: 'The Kirkulator' },
+    Otter:      { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Quaasus:    { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Sweaty:     { founder: true, photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Killernini: { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Hugo:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Fynn:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Samier:     { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' },
+    Reto:       { photo: '', nickname: '', walkOn: '', favDouble: '', dreamFinish: '', hand: '', darts: '', favPlayer: '', favWalkOn: '', favNickname: '' }
   },
 
   nextTournament: null,

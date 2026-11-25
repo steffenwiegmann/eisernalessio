@@ -52,9 +52,14 @@
     groupMatches: t.groupMatches || [],
     knockout: t.knockout || [],
     notes: t.notes || [],
-    events: t.events || []
+    events: t.events || [],
+    // Single Out (Masters I–III): Average, Checkout, Finish und Short Leg sind nicht mit Double Out vergleichbar
+    so: /single\s*out/i.test(t.mode || '')
   }));
   const LATEST = TOURS[TOURS.length - 1];
+  const FIRST_DO = TOURS.find((t) => !t.so);
+  const DO_NOTE = FIRST_DO && TOURS.some((t) => t.so) ? `ab ${FIRST_DO.title} (Double Out)` : '';
+  const soTag = '<span class="badge badge-so" title="Single Out – zählt nicht in Averages, Checkout- und Finish-Rekorde">SO</span>';
 
   // Turnier-Average exakt aus Autodarts-Daten (Ø × Darts), wenn für alle Matches eines Spielers vorhanden
   TOURS.forEach((t) => {
@@ -106,13 +111,15 @@
   });
   const SCORED = MATCHES.filter((m) => isNum(m.s1) && isNum(m.s2));
   const STAT_ROWS = TOURS.flatMap((t) => t.stats.map((s) => Object.assign({ t }, s)));
+  const STAT_DO = STAT_ROWS.filter((s) => !s.t.so); // modusabhängige Werte (Average, Checkout, Finish, Short Leg)
+  const STAT_SO = STAT_ROWS.filter((s) => s.t.so);
 
   // Spieler-Aggregate
   const AGG = {};
   PLAYER_NAMES.forEach((n) => {
     AGG[n] = {
       name: n, founder: isFounder(n), entries: [], places: [], titles: 0, finals: 0, podiums: 0,
-      avgs: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
+      avgs: [], avgChart: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
       s180: 0, robinhood: 0, ninedarter: 0,
       profile: (D.players || {})[n] || {}
     };
@@ -136,11 +143,14 @@
       if (place <= 2) a.finals++;
       if (place <= 3) a.podiums++;
       if (stat) {
-        if (isNum(stat.avg)) a.avgs.push({ v: stat.avg, t });
-        keepBest(a, 'avg', stat.avg, t, 'max');
+        if (isNum(stat.avg)) a.avgChart.push({ v: stat.avg, t });
         keepBest(a, 'hs', stat.hs, t, 'max');
-        keepBest(a, 'hco', stat.hco, t, 'max');
-        keepBest(a, 'minDarts', stat.minDarts, t, 'min');
+        if (!t.so) {
+          if (isNum(stat.avg)) a.avgs.push({ v: stat.avg, t });
+          keepBest(a, 'avg', stat.avg, t, 'max');
+          keepBest(a, 'hco', stat.hco, t, 'max');
+          keepBest(a, 'minDarts', stat.minDarts, t, 'min');
+        }
       }
     });
     if (t.ballonDart && AGG[t.ballonDart]) AGG[t.ballonDart].ballon++;
@@ -154,7 +164,7 @@
       a.mW += win ? 1 : 0; a.mL += win ? 0 : 1; a.lW += sm; a.lL += so;
       const h = a.h2h[op] || (a.h2h[op] = { w: 0, l: 0, lw: 0, ll: 0 });
       h.w += win ? 1 : 0; h.l += win ? 0 : 1; h.lw += sm; h.ll += so;
-      keepBest(a, 'matchAvg', av, m.t, 'max');
+      if (!m.t.so) keepBest(a, 'matchAvg', av, m.t, 'max');
     });
   });
   Object.values(AGG).forEach((a) => {
@@ -359,9 +369,9 @@
         ${ticks.map((v) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${ys(v)}" y2="${ys(v)}"/><text class="axis" x="${L - 8}" y="${ys(v) + 4}" text-anchor="end">${v}</text>`).join('')}
         ${TOURS.map((t, i) => `<text class="axis" x="${xs(i)}" y="${H - 12}" text-anchor="middle">${t.roman}</text>`).join('')}
         <path class="line" d="${path}"/>
-        ${pts.map((q) => `<g class="pt" tabindex="0"><circle class="hit" cx="${q.x}" cy="${q.y}" r="16"/><circle class="dot" cx="${q.x}" cy="${q.y}" r="5.5"/><text class="pt-label" x="${q.x}" y="${q.y - 14}" text-anchor="middle">${num(q.p.v, 2)}</text><title>${esc(q.p.t.title)}: Ø ${num(q.p.v, 2)}</title></g>`).join('')}
+        ${pts.map((q) => `<g class="pt${q.p.t.so ? ' pt-so' : ''}" tabindex="0"><circle class="hit" cx="${q.x}" cy="${q.y}" r="16"/><circle class="dot" cx="${q.x}" cy="${q.y}" r="5.5"/><text class="pt-label" x="${q.x}" y="${q.y - 14}" text-anchor="middle">${num(q.p.v, 2)}</text><title>${esc(q.p.t.title)}: Ø ${num(q.p.v, 2)}${q.p.t.so ? ' (Single Out)' : ''}</title></g>`).join('')}
       </svg>
-      <figcaption>3-Dart-Average je Turnier (Turniere ohne Statistik fehlen).</figcaption>
+      <figcaption>3-Dart-Average je Turnier (Turniere ohne Statistik fehlen).${points.some((p) => p.t.so) ? ' Hohle Punkte = Single Out, nicht direkt vergleichbar.' : ''}</figcaption>
     </figure>`;
   }
 
@@ -636,6 +646,7 @@
     const stats = t.stats.length ? `
       <section class="wrap section">
         ${sectionHead('Zahlen', 'Bestwerte des Turniers')}
+        ${t.so ? `<p class="note-so">${soTag} Dieses Turnier wurde mit <strong>Single Out</strong> gespielt. Average, Checkout, Finish und Short Leg zählen deshalb nicht in die ewigen Averages und Rekorde – High Score und 180er schon.</p>` : ''}
         <div class="records">${tourBests(t)}</div>
       </section>
       <section class="wrap section">
@@ -706,24 +717,33 @@
       { v: m.a1, p: m.p1, o: m.p2, t: m.t, r: m.stage },
       { v: m.a2, p: m.p2, o: m.p1, t: m.t, r: m.stage }
     ]);
+    const whoM = (i) => `${pLink(i.p)} <span class="muted">vs. ${esc(i.o)} · ${esc(i.r)}, ${tLink(i.t)}</span>`;
+    // Modusabhängige Rekorde – getrennt nach Double Out und Single Out
+    const modeRecords = (rows, so, sub) => [
+      recordCard('Bester Turnier-Average', best(rows.map((s) => ({ v: s.avg, p: s.p, t: s.t })), 'max'), (v) => num(v, 2), whoT, sub),
+      recordCard('Bester Match-Average', best(matchAvgs.filter((i) => i.t.so === so), 'max'), (v) => num(v, 2), whoM, sub),
+      recordCard('Höchstes Finish', best(rows.map((s) => ({ v: s.hco, p: s.p, t: s.t })), 'max'), (v) => v, whoT, sub),
+      recordCard('Kürzestes Leg', best(rows.map((s) => ({ v: s.minDarts, p: s.p, t: s.t })), 'min'), (v) => v + ' Darts', whoT, sub),
+      recordCard('Beste Checkout-Quote', best(rows.map((s) => ({ v: coRate(s), p: s.p, t: s.t })), 'max'), pct, whoT, sub)
+    ];
+    const doRec = modeRecords(STAT_DO, false, DO_NOTE ? 'Double Out' : '');
 
     const records = [
-      recordCard('Bester Turnier-Average', best(STAT_ROWS.map((s) => ({ v: s.avg, p: s.p, t: s.t })), 'max'), (v) => num(v, 2), whoT),
-      recordCard('Bester Match-Average', best(matchAvgs, 'max'), (v) => num(v, 2), (i) => `${pLink(i.p)} <span class="muted">vs. ${esc(i.o)} · ${esc(i.r)}, ${tLink(i.t)}</span>`),
+      doRec[0], doRec[1],
       recordCard('Höchster Score', best(STAT_ROWS.map((s) => ({ v: s.hs, p: s.p, t: s.t })), 'max'), (v) => v, whoT),
-      recordCard('Höchstes Finish', best(STAT_ROWS.map((s) => ({ v: s.hco, p: s.p, t: s.t })), 'max'), (v) => v, whoT),
-      recordCard('Kürzestes Leg', best(STAT_ROWS.map((s) => ({ v: s.minDarts, p: s.p, t: s.t })), 'min'), (v) => v + ' Darts', whoT),
-      recordCard('Beste Checkout-Quote', best(STAT_ROWS.map((s) => ({ v: coRate(s), p: s.p, t: s.t })), 'max'), pct, whoT),
+      doRec[2], doRec[3], doRec[4],
       recordCard('Deutlichster Leg-Sieg', best(legWins, 'max'), (v) => '+' + v, (i) => `${pLink(i.p)} <span class="muted">vs. ${esc(i.o)} · ${tLink(i.t)}</span>`, 'Restpunkte des Gegners'),
       recordCard('Meiste Titel', best(players.map((a) => ({ v: a.titles, p: a.name })), 'max'), (v) => v + '×', (i) => pLink(i.p))
     ].join('');
+    const soTours = TOURS.filter((t) => t.so);
+    const soRecords = STAT_SO.length ? modeRecords(STAT_SO, true).join('') : '';
 
     const eternal = players.slice().sort((a, b) =>
       b.titles - a.titles || b.finals - a.finals || b.podiums - a.podiums || a.avgPlace - b.avgPlace || b.entries.length - a.entries.length);
     const eternalTable = table(
       [{ l: '#' }, { l: 'Spieler' }, { l: 'Turniere', cls: 'r' }, { l: '🏆 Titel', cls: 'r' }, { l: 'Finals', cls: 'r' },
         { l: 'Podien', cls: 'r' }, { l: 'Ø Platz', cls: 'r' }, { l: 'Matches', cls: 'r', title: 'Siege–Niederlagen (Matches mit bekanntem Ergebnis)' },
-        { l: 'Legs', cls: 'r' }, { l: 'Ø Average', cls: 'r' }],
+        { l: 'Legs', cls: 'r' }, { l: 'Ø Average', cls: 'r', title: DO_NOTE ? 'Nur Turniere ' + DO_NOTE : '' }],
       eternal.map((a, i) => `<tr${i === 0 ? ' class="lead-row"' : ''}>
         <td>${placeBadge(i + 1)}</td>
         <td>${pLink(a.name)}${a.founder ? '<span class="badge" title="Gründungsmitglied">GM</span>' : ''}</td>
@@ -742,7 +762,7 @@
       tip: `${a.name}: Ø ${num(a.careerAvg, 2)} aus ${a.avgs.length} Turnier${a.avgs.length > 1 ? 'en' : ''} · Bestwert ${num(a.best.avg.v, 2)} (${a.best.avg.t.title})`
     }));
     const avgMin = avgRank.length ? Math.floor(Math.min.apply(null, avgRank.map((i) => i.v)) / 5) * 5 - 5 : 0;
-    const bestAvgRank = STAT_ROWS.filter((s) => isNum(s.avg)).sort((a, b) => b.avg - a.avg).slice(0, 8).map((s) => ({
+    const bestAvgRank = STAT_DO.filter((s) => isNum(s.avg)).sort((a, b) => b.avg - a.avg).slice(0, 8).map((s) => ({
       label: `${s.p} · ${s.t.roman}`, href: s.t.url, v: s.avg, display: num(s.avg, 2), tip: `${s.p} bei ${s.t.title}: Ø ${num(s.avg, 2)}`
     }));
     const winRank = players.filter((a) => a.matches >= 4).sort((a, b) => b.winRate - a.winRate || b.mW - a.mW).map((a) => ({
@@ -775,8 +795,14 @@
     </section>
     <section class="wrap section">
       ${sectionHead('Für die Ewigkeit', 'Rekorde')}
+      ${DO_NOTE ? `<p class="muted small">Average, Finish, Short Leg und Checkout zählen erst ${DO_NOTE} – bei Single Out ist das Auschecken deutlich leichter. High Score, 180er, Titel und Bilanzen zählen über alle Turniere.</p>` : ''}
       <div class="records">${records}</div>
     </section>
+    ${soRecords ? `<section class="wrap section">
+      ${sectionHead('Archiv', 'Single-Out-Ära')}
+      <p class="muted small">Bestwerte aus ${soTours.map((t) => t.title).join(', ')} – gespielt mit Single Out. Bleiben für die Geschichtsbücher, zählen aber nicht in die Rekorde und Averages oben.</p>
+      <div class="records records-so">${soRecords}</div>
+    </section>` : ''}
     <section class="wrap section">
       ${sectionHead('Alle Turniere', 'Ewige Tabelle')}
       <p class="muted small">Sortiert nach Titeln, Finalteilnahmen, Podien und durchschnittlicher Platzierung.</p>
@@ -785,12 +811,12 @@
     <section class="wrap section chart-grid">
       <div class="panel">
         ${sectionHead('Rangliste', 'Ø 3-Dart-Average')}
-        <p class="muted small">Mittelwert der Turnier-Averages. Turniere ohne Statistik zählen nicht.</p>
+        <p class="muted small">Mittelwert der Turnier-Averages${DO_NOTE ? ' ' + DO_NOTE : ''}. Turniere ohne Statistik zählen nicht.</p>
         ${barChart(avgRank, { min: avgMin })}
       </div>
       <div class="panel">
         ${sectionHead('Rangliste', 'Beste Turnier-Averages')}
-        <p class="muted small">Die besten Einzelleistungen über ein ganzes Turnier.</p>
+        <p class="muted small">Die besten Einzelleistungen über ein ganzes Turnier${DO_NOTE ? ' ' + DO_NOTE : ''}.</p>
         ${barChart(bestAvgRank, { min: avgMin })}
       </div>
       <div class="panel">
@@ -839,7 +865,7 @@
       kpi('Bestes Ergebnis', a.bestPlace ? a.bestPlace + '.' : '–'),
       kpi('Ø Platz', num(a.avgPlace, 1)),
       kpi('Matches', a.matches ? `${a.mW}–${a.mL}` : '–', a.matches ? pct(a.winRate) + ' Siege' : ''),
-      kpi('Ø Average', a.careerAvg != null ? num(a.careerAvg, 2) : '–')
+      kpi('Ø Average', a.careerAvg != null ? num(a.careerAvg, 2) : '–', DO_NOTE ? 'nur Double Out' : '')
     ].join('');
     const rec = (label, b, f) => (b ? `<div class="record"><div class="record-label">${label}</div><div class="record-value">${f(b.v)}</div><div class="record-who">${tLink(b.t)}</div></div>` : '');
     const records = [
@@ -853,7 +879,7 @@
     const history = table(
       [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Platz', cls: 'c' }, { l: '3-Dart Ø', cls: 'r' }, { l: 'High Score', cls: 'r' }, { l: 'High Finish', cls: 'r' }, { l: 'Short Leg', cls: 'r' }],
       a.entries.slice().reverse().map((e) => `<tr>
-        <td>${tLink(e.t)}${e.t.ballonDart === a.name ? ' <span title="Ballon-Dart-Sieger">🎈</span>' : ''}${e.t.host === a.name ? ' <span title="Ausrichter">🏠</span>' : ''}</td>
+        <td>${tLink(e.t)}${e.t.so && e.stat ? ' ' + soTag : ''}${e.t.ballonDart === a.name ? ' <span title="Ballon-Dart-Sieger">🎈</span>' : ''}${e.t.host === a.name ? ' <span title="Ausrichter">🏠</span>' : ''}</td>
         <td class="num">${dateShort(e.t.date)}</td>
         <td class="c">${placeBadge(e.place)}</td>
         <td class="r num">${e.stat ? num(e.stat.avg, 2) : '–'}</td>
@@ -886,7 +912,9 @@
       ['Traumfinish', nv(P.dreamFinish)],
       ['Wurfhand', nv(P.hand)],
       ['Darts', nv(P.darts)],
-      ['Lieblingsspieler', nv(P.favPlayer)]
+      ['Lieblingsspieler', nv(P.favPlayer)],
+      ['Lieblings-Walk-On', nv(P.favWalkOn)],
+      ['Lieblingsspitzname', nv(P.favNickname)]
     ]);
     // automatisch berechnet
     const autoFacts = factList([
@@ -909,8 +937,9 @@
     <section class="wrap section">
       ${sectionHead('Karriere', 'Turnierhistorie')}
       ${history}
+      ${a.entries.some((e) => e.t.so && e.stat) ? `<p class="muted small">${soTag} = Single Out: Average, Finish und Short Leg zählen nicht in Ø Average und Bestwerte.</p>` : ''}
     </section>
-    ${a.avgs.length >= 2 ? `<section class="wrap section">${sectionHead('Form', 'Average-Verlauf')}<div class="panel">${lineChart(a.avgs)}</div></section>` : ''}
+    ${a.avgChart.length >= 2 ? `<section class="wrap section">${sectionHead('Form', 'Average-Verlauf')}<div class="panel">${lineChart(a.avgChart)}</div></section>` : ''}
     <section class="wrap section">
       ${sectionHead('Duelle', 'Head-to-Head')}
       ${h2hTable}
