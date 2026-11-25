@@ -53,7 +53,7 @@
     knockout: t.knockout || [],
     notes: t.notes || [],
     events: t.events || [],
-    // Single Out (Masters I–III): Average, Checkout, Finish und Short Leg sind nicht mit Double Out vergleichbar
+    // Single Out (Masters I–III): Average, Checkout, Finish und Shortest Leg sind nicht mit Double Out vergleichbar
     so: /single\s*out/i.test(t.mode || '')
   }));
   const LATEST = TOURS[TOURS.length - 1];
@@ -80,8 +80,17 @@
     });
   });
 
-  // Besondere Ereignisse (180er, 9-Darter) je Turnier und Spieler
-  const EVENT_TYPES = { '180': { icon: '💥', label: '180' }, '9darter': { icon: '✨', label: '9-Darter' } };
+  // Besondere Ereignisse (180er, 100+ Finishes, 9-Darter) je Turnier und Spieler
+  const EVENT_TYPES = { '180': { icon: '💥', label: '180' }, highfinish: { icon: '🎯', label: '100+ Finish' }, '9darter': { icon: '✨', label: '9-Darter' } };
+  // 100+ Finishes zählen nur bei Double Out. Quelle: events (type 'highfinish', v = Wert);
+  // ist dort nichts eingetragen, zählt ein Highest Checkout ab 100 aus stats als ein Finish.
+  function highFinishes(t, p) {
+    if (t.so) return [];
+    const ev = t.events.filter((e) => e.type === 'highfinish' && e.p === p && !(isNum(e.v) && e.v < 100)).map((e) => e.v);
+    if (ev.length) return ev;
+    const s = t.stats.find((x) => x.p === p);
+    return s && isNum(s.hco) && s.hco >= 100 ? [s.hco] : [];
+  }
   function eventCount(t, p, type) {
     const n = t.events.filter((e) => e.type === type && e.p === p).length;
     if (type === '180') {
@@ -111,7 +120,7 @@
   });
   const SCORED = MATCHES.filter((m) => isNum(m.s1) && isNum(m.s2));
   const STAT_ROWS = TOURS.flatMap((t) => t.stats.map((s) => Object.assign({ t }, s)));
-  const STAT_DO = STAT_ROWS.filter((s) => !s.t.so); // modusabhängige Werte (Average, Checkout, Finish, Short Leg)
+  const STAT_DO = STAT_ROWS.filter((s) => !s.t.so); // modusabhängige Werte (Average, Checkout, Finish, Shortest Leg)
   const STAT_SO = STAT_ROWS.filter((s) => s.t.so);
 
   // Spieler-Aggregate
@@ -120,7 +129,7 @@
     AGG[n] = {
       name: n, founder: isFounder(n), entries: [], places: [], titles: 0, finals: 0, podiums: 0,
       avgs: [], avgChart: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
-      s180: 0, ninedarter: 0,
+      s180: 0, ninedarter: 0, hiFin: [],
       profile: (D.players || {})[n] || {}
     };
   });
@@ -136,6 +145,7 @@
       const stat = t.stats.find((s) => s.p === p) || null;
       a.entries.push({ t, place, stat });
       a.s180 += eventCount(t, p, '180');
+      a.hiFin.push(...highFinishes(t, p));
       a.ninedarter += eventCount(t, p, '9darter');
       a.places.push(place);
       if (place === 1) a.titles++;
@@ -544,8 +554,8 @@
     { k: 'avg', l: '3-Dart Ø', d: 2, best: 'max', title: '3-Dart-Average' },
     { k: 'hs', l: 'High Score', best: 'max', title: 'Höchste Aufnahme' },
     { k: 'co', l: 'Checkout', get: coRate, fmt: (v, s) => `${pct(v)} <small>${s.coHit}/${s.coAtt}</small>`, best: 'max', title: 'Checkout-Quote (Treffer/Versuche)' },
-    { k: 'hco', l: 'High Finish', best: 'max', title: 'Höchstes Checkout' },
-    { k: 'minDarts', l: 'Short Leg', best: 'min', fmt: (v) => `${v} <small>Ø ${num(avgFromDarts(v), 2)}</small>`, title: 'Kürzestes Leg in Darts' },
+    { k: 'hco', l: 'Highest Finish', best: 'max', title: 'Höchstes Checkout' },
+    { k: 'minDarts', l: 'Shortest Leg', best: 'min', fmt: (v) => `${v} <small>Ø ${num(avgFromDarts(v), 2)}</small>`, title: 'Kürzestes Leg in Darts' },
     { k: 's60', l: '60+', best: 'max' },
     { k: 's100', l: '100+', best: 'max' },
     { k: 's140', l: '140+', best: 'max' },
@@ -576,8 +586,8 @@
     const defs = [
       ['3-Dart-Average', 'avg', 'max', (v) => num(v, 2)],
       ['High Score', 'hs', 'max', (v) => v],
-      ['High Finish', 'hco', 'max', (v) => v],
-      ['Short Leg', 'minDarts', 'min', (v) => v + ' Darts'],
+      ['Highest Finish', 'hco', 'max', (v) => v],
+      ['Shortest Leg', 'minDarts', 'min', (v) => v + ' Darts'],
       ['Checkout-Quote', 'co', 'max', pct]
     ];
     const tiles = defs.map(([label, k, dir, f]) => {
@@ -647,7 +657,7 @@
     const stats = t.stats.length ? `
       <section class="wrap section">
         ${sectionHead('Zahlen', 'Bestwerte des Turniers')}
-        ${t.so ? `<p class="note-so">${soTag} Dieses Turnier wurde mit <strong>Single Out</strong> gespielt. Average, Checkout, Finish und Short Leg zählen deshalb nicht in die ewigen Averages und Rekorde – High Score und 180er schon.</p>` : ''}
+        ${t.so ? `<p class="note-so">${soTag} Dieses Turnier wurde mit <strong>Single Out</strong> gespielt. Average, Checkout, Finish und Shortest Leg zählen deshalb nicht in die ewigen Averages und Rekorde – High Score und 180er schon.</p>` : ''}
         <div class="records">${tourBests(t)}</div>
       </section>
       <section class="wrap section">
@@ -657,7 +667,7 @@
 
     const momentItems = t.events.map((e) => {
       const ty = EVENT_TYPES[e.type] || { icon: '⭐', label: e.type };
-      return `<li><span class="m-icon" aria-hidden="true">${ty.icon}</span><span><strong>${esc(ty.label)}</strong> · ${pLink(e.p)}${e.note ? ` <span class="muted">– ${esc(e.note)}</span>` : ''}</span></li>`;
+      return `<li><span class="m-icon" aria-hidden="true">${ty.icon}</span><span><strong>${esc(ty.label)}</strong>${isNum(e.v) ? ` ${e.v}` : ''} · ${pLink(e.p)}${e.note ? ` <span class="muted">– ${esc(e.note)}</span>` : ''}</span></li>`;
     });
     const notes = (momentItems.length || t.notes.length) ? `
       <section class="wrap section">
@@ -796,7 +806,7 @@
     </section>
     <section class="wrap section">
       ${sectionHead('Für die Ewigkeit', 'Rekorde')}
-      ${DO_NOTE ? `<p class="muted small">Average, Finish, Short Leg und Checkout zählen erst ${DO_NOTE} – bei Single Out ist das Auschecken deutlich leichter. High Score, 180er, Titel und Bilanzen zählen über alle Turniere.</p>` : ''}
+      ${DO_NOTE ? `<p class="muted small">Average, Finish, Shortest Leg und Checkout zählen erst ${DO_NOTE} – bei Single Out ist das Auschecken deutlich leichter. High Score, 180er, Titel und Bilanzen zählen über alle Turniere.</p>` : ''}
       <div class="records">${records}</div>
     </section>
     ${soRecords ? `<section class="wrap section">
@@ -873,12 +883,12 @@
       rec('Bester Turnier-Average', B.avg, (v) => num(v, 2)),
       rec('Bester Match-Average', B.matchAvg, (v) => num(v, 2)),
       rec('High Score', B.hs, (v) => v),
-      rec('High Finish', B.hco, (v) => v),
-      rec('Short Leg', B.minDarts, (v) => v + ' Darts')
+      rec('Highest Finish', B.hco, (v) => v),
+      rec('Shortest Leg', B.minDarts, (v) => v + ' Darts')
     ].join('');
 
     const history = table(
-      [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Platz', cls: 'c' }, { l: '3-Dart Ø', cls: 'r' }, { l: 'High Score', cls: 'r' }, { l: 'High Finish', cls: 'r' }, { l: 'Short Leg', cls: 'r' }],
+      [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Platz', cls: 'c' }, { l: '3-Dart Ø', cls: 'r' }, { l: 'High Score', cls: 'r' }, { l: 'Highest Finish', cls: 'r' }, { l: 'Shortest Leg', cls: 'r' }],
       a.entries.slice().reverse().map((e) => `<tr>
         <td>${tLink(e.t)}${e.t.so && e.stat ? ' ' + soTag : ''}${e.t.ballonDart === a.name ? ' <span title="Ballon-Dart-Sieger">🎈</span>' : ''}${e.t.host === a.name ? ' <span title="Ausrichter">🏠</span>' : ''}</td>
         <td class="num">${dateShort(e.t.date)}</td>
@@ -905,7 +915,7 @@
     // Steckbrief (manuell gepflegt in data.js → players)
     const P = a.profile;
     const nv = (v) => (v ? esc(v) : '<span class="muted">noch nicht hinterlegt</span>');
-    const factList = (items) => `<dl class="facts profile-facts">${items.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+    const factList = (items) => `<dl class="facts profile-facts">${items.map(([k, v, tip]) => `<div><dt${tip ? ` title="${esc(tip)}"` : ''}>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
     const steckbrief = factList([
       ['Spitzname-Herkunft', nv(P.nickname)],
       ['Walk-On-Song', nv(P.walkOn)],
@@ -921,9 +931,10 @@
     const autoFacts = factList([
       ['Dabei seit', a.since ? `${tLink(a.since)} <span class="muted">· ${dateShort(a.since.date)}</span>` : '–'],
       ['Erzrivale', a.rival ? `${pLink(a.rival.op)} <span class="muted">· ${a.rival.n} Duelle, Bilanz ${a.rival.w}–${a.rival.l}</span>` : '–'],
-      ['Angstgegner', a.nemesis ? `${pLink(a.nemesis.op)} <span class="muted">· Bilanz ${a.nemesis.w}–${a.nemesis.l}</span>` : '<span class="muted">keiner – bisher</span>'],
       ['Lieblingsgegner', a.favOpp ? `${pLink(a.favOpp.op)} <span class="muted">· Bilanz ${a.favOpp.w}–${a.favOpp.l}</span>` : '<span class="muted">noch keiner</span>'],
+      ['Angstgegner', a.nemesis ? `${pLink(a.nemesis.op)} <span class="muted">· Bilanz ${a.nemesis.w}–${a.nemesis.l}</span>` : '<span class="muted">keiner – bisher</span>'],
       ['180er', String(a.s180)],
+      ['100+ Finishes', a.hiFin.length ? `${a.hiFin.length} <span class="muted">· ${a.hiFin.filter(isNum).sort((x, y) => y - x).join(', ')}</span>` : '0', 'Checkouts ab 100 Punkten, nur Double Out'],
       ...(a.ninedarter ? [['9-Darter', '✨ ' + a.ninedarter]] : [])
     ]);
     return `
@@ -938,7 +949,7 @@
     <section class="wrap section">
       ${sectionHead('Karriere', 'Turnierhistorie')}
       ${history}
-      ${a.entries.some((e) => e.t.so && e.stat) ? `<p class="muted small">${soTag} = Single Out: Average, Finish und Short Leg zählen nicht in Ø Average und Bestwerte.</p>` : ''}
+      ${a.entries.some((e) => e.t.so && e.stat) ? `<p class="muted small">${soTag} = Single Out: Average, Finish und Shortest Leg zählen nicht in Ø Average und Bestwerte.</p>` : ''}
     </section>
     ${a.avgChart.length >= 2 ? `<section class="wrap section">${sectionHead('Form', 'Average-Verlauf')}<div class="panel">${lineChart(a.avgChart)}</div></section>` : ''}
     <section class="wrap section">

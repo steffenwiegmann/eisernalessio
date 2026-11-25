@@ -36,7 +36,8 @@
  *
  *  Weitere Felder pro Turnier (alle optional):
  *    time     Startzeit 'HH:MM' (für die Uhr „Seit dem letzten Turnier“)
- *    events   [ { type: '180' | '9darter', p: 'Spieler', note: '…' } ]
+ *    events   [ { type: '180' | 'highfinish' | '9darter', p: 'Spieler', v: 121, note: '…' } ]
+ *             highfinish = Checkout ab 100 (nur Double Out), v = Wert des Finishes
  *
  *  Felder pro Spieler in `players` (alle optional, leer = „noch nicht hinterlegt“):
  *    founder       true bei Gründungsmitgliedern
