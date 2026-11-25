@@ -785,7 +785,7 @@
       ${kpi('Spieler', PLAYER_NAMES.length)}
       ${kpi('Matches', SCORED.length, 'mit bekanntem Ergebnis')}
       ${kpi('Legs', SCORED.reduce((s, m) => s + m.s1 + m.s2, 0))}
-      ${kpi('💥 180er', players.reduce((s, a) => s + a.s180, 0), 'soweit erfasst')}
+      ${kpi('💥 180er', players.reduce((s, a) => s + a.s180, 0))}
       ${kpi('🏆 Sieger', new Set(TOURS.map((t) => t.winner).filter(Boolean)).size, 'verschiedene Champions')}
     </section>
     <section class="wrap section">
@@ -825,7 +825,7 @@
       </div>
       <div class="panel">
         ${sectionHead('Nebenschauplätze', 'Ehrungen &amp; Momente')}
-        ${table([{ l: 'Spieler' }, { l: '🏠', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: '🎈', cls: 'r', title: 'Ballon-Dart-Siege' }, { l: '💥 180', cls: 'r', title: '180er (soweit erfasst)' }],
+        ${table([{ l: 'Spieler' }, { l: '🏠', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: '🎈', cls: 'r', title: 'Ballon-Dart-Siege' }, { l: '💥 180', cls: 'r', title: '180er' }],
           players.filter((a) => a.hosted || a.ballon || a.s180).sort((a, b) => (b.hosted + b.ballon + b.s180) - (a.hosted + a.ballon + a.s180))
             .map((a) => `<tr><td>${pLink(a.name)}</td><td class="r num">${a.hosted}</td><td class="r num">${a.ballon}</td><td class="r num">${a.s180}</td></tr>`), 'compact')}
         <p class="muted small">🏠 Ausrichter · 🎈 Ballon Dart · 💥 180er</p>
@@ -920,7 +920,7 @@
       ['Dabei seit', a.since ? `${tLink(a.since)} <span class="muted">· ${dateShort(a.since.date)}</span>` : '–'],
       ['Erzrivale', a.rival ? `${pLink(a.rival.op)} <span class="muted">· ${a.rival.n} Duelle, Bilanz ${a.rival.w}–${a.rival.l}</span>` : '–'],
       ['Angstgegner', a.nemesis ? `${pLink(a.nemesis.op)} <span class="muted">· Bilanz ${a.nemesis.w}–${a.nemesis.l}</span>` : '<span class="muted">keiner – bisher</span>'],
-      ['180er', `${a.s180} <span class="muted">· soweit erfasst</span>`],
+      ['180er', String(a.s180)],
       ...(a.ninedarter ? [['9-Darter', '✨ ' + a.ninedarter]] : [])
     ]);
     return `
