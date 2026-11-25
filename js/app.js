@@ -890,7 +890,7 @@
     const history = table(
       [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Platz', cls: 'c' }, { l: '3-Dart Ø', cls: 'r' }, { l: 'High Score', cls: 'r' }, { l: 'Highest Finish', cls: 'r' }, { l: 'Shortest Leg', cls: 'r' }],
       a.entries.slice().reverse().map((e) => `<tr>
-        <td>${tLink(e.t)}${e.t.so && e.stat ? ' ' + soTag : ''}${e.t.ballonDart === a.name ? ' <span title="Ballon-Dart-Sieger">🎈</span>' : ''}${e.t.host === a.name ? ' <span title="Ausrichter">🏠</span>' : ''}</td>
+        <td>${tLink(e.t)}${e.t.so ? ' ' + soTag : ''}${e.t.ballonDart === a.name ? ' <span title="Ballon-Dart-Sieger">🎈</span>' : ''}${e.t.host === a.name ? ' <span title="Ausrichter">🏠</span>' : ''}</td>
         <td class="num">${dateShort(e.t.date)}</td>
         <td class="c">${placeBadge(e.place)}</td>
         <td class="r num">${e.stat ? num(e.stat.avg, 2) : '–'}</td>
@@ -949,7 +949,7 @@
     <section class="wrap section">
       ${sectionHead('Karriere', 'Turnierhistorie')}
       ${history}
-      ${a.entries.some((e) => e.t.so && e.stat) ? `<p class="muted small">${soTag} = Single Out: Average, Finish und Shortest Leg zählen nicht in Ø Average und Bestwerte.</p>` : ''}
+      ${a.entries.some((e) => e.t.so) ? `<p class="muted small">${soTag} = Single Out: Average, Finish und Shortest Leg zählen nicht in Ø Average und Bestwerte.</p>` : ''}
     </section>
     ${a.avgChart.length >= 2 ? `<section class="wrap section">${sectionHead('Form', 'Average-Verlauf')}<div class="panel">${lineChart(a.avgChart)}</div></section>` : ''}
     <section class="wrap section">
