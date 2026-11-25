@@ -22,6 +22,7 @@ Statische Website des Dart-Freundeskreises **Eisern Alessio** mit der internen T
 | `eamasters.html` | Turnierübersicht als Zeitstrahl – `data-page="turniere"` |
 | `turnier.html?nr=N` | Turnierdetail (Podium, Endrunde, Gruppen, Statistiken) – `data-page="turnier"` |
 | `statistiken.html` | Ehrentafel, Rekorde, Ewige Tabelle, Ranglisten – `data-page="statistiken"` |
+| `ruhmeshalle.html` | Ruhmeshalle: Wanderpokal (SVG) mit gravierten Siegern, Champions (jeder einmal), Meilensteine, Rekordhalter – `data-page="ruhmeshalle"` |
 | `spieler.html[?name=X]` | Spielerliste bzw. Spielerprofil – `data-page="spieler"` |
 | `eamastersrules.html` | Regeln (statisches HTML) – `data-page="regeln"` |
 | `club.html` | Verein (statischer Text, Spielerlisten per JS) – `data-page="verein"` |
@@ -93,4 +94,4 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 - Änderungen lokal machen, mit `node .claude/serve.js` im Browser prüfen (auch Handy-Breite), dann committen und auf `main` pushen.
 - Commit-Messages kurz auf Deutsch.
 - Vor dem Push: Seiten auf JS-Fehler prüfen (Konsole) und sicherstellen, dass interne Links funktionieren.
-- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=14`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.
+- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=15`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.

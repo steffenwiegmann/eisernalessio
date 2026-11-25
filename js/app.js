@@ -216,6 +216,7 @@
     ['index.html', 'Start', 'home'],
     ['eamasters.html', 'Turniere', 'turniere'],
     ['statistiken.html', 'Statistiken', 'statistiken'],
+    ['ruhmeshalle.html', 'Ruhmeshalle', 'ruhmeshalle'],
     ['spieler.html', 'Spieler', 'spieler'],
     ['eamastersrules.html', 'Regeln', 'regeln'],
     ['club.html', 'Verein', 'verein']
@@ -822,7 +823,7 @@
     <section class="wrap section chart-grid">
       <div class="panel">
         ${sectionHead('Rangliste', 'Ø 3-Dart-Average')}
-        <p class="muted small">Mittelwert der Turnier-Averages${DO_NOTE ? ' ' + DO_NOTE : ''}. Turniere ohne Statistik zählen nicht.</p>
+        <p class="muted small">Mittelwert der Turnier-Averages${DO_NOTE ? ' ' + DO_NOTE : ''}.</p>
         ${barChart(avgRank, { min: avgMin })}
       </div>
       <div class="panel">
@@ -842,6 +843,174 @@
             .map((a) => `<tr><td>${pLink(a.name)}</td><td class="r num">${a.hosted}</td><td class="r num">${a.ballon}</td><td class="r num">${a.s180}</td></tr>`), 'compact')}
         <p class="muted small">🏠 Ausrichter · 🎈 Ballon Dart · 💥 180er</p>
       </div>
+    </section>`;
+  }
+
+  /* =========================================================
+     Ruhmeshalle
+     ========================================================= */
+  // Wanderpokal als SVG: jeder Sieger bekommt ein graviertes Plättchen im Sockel
+  function trophySvg() {
+    const W = 420, PW = 150, PH = 50, GX = 14, GY = 12, TOP = 264;
+    const plates = TOURS.filter((t) => t.winner).map((t) => ({ t }));
+    const nextNr = TOURS.length ? TOURS[TOURS.length - 1].nr + 1 : 1;
+    plates.push({ next: nextNr });
+    const rows = Math.ceil(plates.length / 2);
+    const blockH = 22 + rows * PH + (rows - 1) * GY + 22;
+    const H = TOP + blockH + 18;
+    const x0 = W / 2 - PW - GX / 2;
+    const plate = (p, i) => {
+      const x = x0 + (i % 2) * (PW + GX);
+      const y = TOP + 22 + Math.floor(i / 2) * (PH + GY);
+      if (p.next) {
+        return `<g class="tr-plate-next"><rect x="${x}" y="${y}" width="${PW}" height="${PH}" rx="4"/>
+          <text class="tr-eng-small" x="${x + PW / 2}" y="${y + 19}" text-anchor="middle">MASTERS ${roman(p.next)}</text>
+          <text class="tr-eng-name" x="${x + PW / 2}" y="${y + 41}" text-anchor="middle">? ? ?</text></g>`;
+      }
+      return `<a href="${p.t.url}" class="tr-plate-link"><g class="tr-plate">
+          <title>${esc(p.t.title)}: ${esc(p.t.winner)}</title>
+          <rect x="${x}" y="${y}" width="${PW}" height="${PH}" rx="4"/>
+          <rect class="tr-plate-inner" x="${x + 4}" y="${y + 4}" width="${PW - 8}" height="${PH - 8}" rx="2"/>
+          <text class="tr-eng-small" x="${x + PW / 2}" y="${y + 19}" text-anchor="middle">MASTERS ${p.t.roman} · ${p.t.date.slice(0, 4)}</text>
+          <text class="tr-eng-name" x="${x + PW / 2}" y="${y + 41}" text-anchor="middle">${esc(p.t.winner.toUpperCase())}</text>
+        </g></a>`;
+    };
+    return `<svg class="trophy-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Wanderpokal der EA Masters mit den eingravierten Siegern">
+      <defs>
+        <linearGradient id="trGold" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" class="tr-g-dark"/><stop offset="0.35" class="tr-g-light"/><stop offset="0.6" class="tr-g-mid"/><stop offset="1" class="tr-g-dark"/>
+        </linearGradient>
+        <linearGradient id="trPlate" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" class="tr-p-light"/><stop offset="1" class="tr-p-dark"/>
+        </linearGradient>
+        <clipPath id="trBowl"><path d="M122 34 H298 V62 C298 132 258 176 210 182 C162 176 122 132 122 62 Z"/></clipPath>
+      </defs>
+      <!-- Henkel -->
+      <path class="tr-handle" d="M126 52 C78 50 76 128 156 140"/>
+      <path class="tr-handle" d="M294 52 C342 50 344 128 264 140"/>
+      <!-- Schale -->
+      <path class="tr-gold" d="M122 34 H298 V62 C298 132 258 176 210 182 C162 176 122 132 122 62 Z"/>
+      <rect class="tr-gold" x="112" y="22" width="196" height="16" rx="8"/>
+      <g clip-path="url(#trBowl)"><rect class="tr-shine" x="60" y="0" width="34" height="200"/></g>
+      <text class="tr-cup-big" x="210" y="104" text-anchor="middle">EA</text>
+      <text class="tr-cup-small" x="210" y="126" text-anchor="middle">MASTERS</text>
+      <!-- Dartscheibe als Emblem -->
+      <g class="tr-emblem"><circle cx="210" cy="150" r="11"/><circle class="tr-emblem-in" cx="210" cy="150" r="6"/><circle cx="210" cy="150" r="2"/></g>
+      <!-- Stiel und Fuß -->
+      <rect class="tr-gold" x="199" y="178" width="22" height="60"/>
+      <ellipse class="tr-gold" cx="210" cy="200" rx="22" ry="8"/>
+      <path class="tr-gold" d="M164 236 H256 L268 256 H152 Z"/>
+      <rect class="tr-gold" x="146" y="254" width="128" height="10" rx="3"/>
+      <!-- Sockel -->
+      <rect class="tr-base" x="36" y="${TOP}" width="348" height="${blockH}" rx="6"/>
+      <rect class="tr-base-edge" x="36" y="${TOP}" width="348" height="6" rx="3"/>
+      <rect class="tr-base" x="24" y="${TOP + blockH}" width="372" height="14" rx="4"/>
+      ${plates.map(plate).join('')}
+    </svg>`;
+  }
+
+  function renderRuhmeshalle() {
+    const won = TOURS.filter((t) => t.winner);
+    // Jeder Sieger genau einmal, in der Reihenfolge seines ersten Titels
+    const champs = [];
+    won.forEach((t) => {
+      let c = champs.find((x) => x.name === t.winner);
+      if (!c) { c = { name: t.winner, first: t, tours: [] }; champs.push(c); }
+      c.tours.push(t);
+    });
+    const champTiles = champs.map((c, i) => `
+      <a class="champ-tile" href="${pUrl(c.name)}">
+        <span class="champ-no">Champion Nr. ${i + 1}</span>
+        <span class="champ-tile-name">${esc(c.name)}${isFounder(c.name) ? '<span class="badge" title="Gründungsmitglied">GM</span>' : ''}</span>
+        <span class="champ-tile-meta">Erster Titel: ${esc(c.first.title)} · ${dateShort(c.first.date)} in ${esc(c.first.venue)}</span>
+        <span class="champ-tile-cups">${c.tours.map((t) => `<span class="cup-chip" title="${esc(t.title)}">${ICON.trophy}${t.roman}</span>`).join('')}</span>
+      </a>`).join('');
+
+    // Amtierender Champion
+    const cur = won[won.length - 1];
+    const reignDays = cur ? Math.max(0, Math.floor((Date.now() - new Date(cur.date + 'T12:00:00').getTime()) / 86400000)) : 0;
+    const spotlight = cur ? `
+      <div class="panel reign">
+        <p class="kicker">Amtierender Champion</p>
+        <div class="reign-name">${pLink(cur.winner)}</div>
+        <div class="reign-days"><span>${reignDays}</span> Tage im Besitz des Pokals</div>
+        <p class="muted">Seit ${esc(cur.title)} am ${dateLong(cur.date)}. Laut Regelwerk richtet ${esc(cur.winner)} die <strong>EA Masters ${roman(cur.nr + 1)}</strong> aus – und muss den Pokal dort verteidigen.</p>
+      </div>` : '';
+
+    // Meilensteine (automatisch aus den Daten)
+    const ms = [];
+    if (won[0]) ms.push({ t: won[0], icon: '🥇', title: 'Der erste Champion', text: `${pLink(won[0].winner)} gewinnt die allererste Austragung und wird Champion Nr. 1.` });
+    const defense = TOURS.find((t, i) => i > 0 && t.winner && t.winner === TOURS[i - 1].winner);
+    if (defense) ms.push({ t: defense, icon: '🛡️', title: 'Erste Titelverteidigung', text: `${pLink(defense.winner)} verteidigt den Pokal – Back-to-Back-Champion.` });
+    const away = TOURS.find((t) => TOURS[0].country && t.country && t.country !== TOURS[0].country);
+    if (away) ms.push({ t: away, icon: '✈️', title: 'Erstes Auswärtsturnier', text: `Die EA Masters gehen ins Ausland: ${esc(away.venue)}, ${esc(away.country)}. Sieger: ${pLink(away.winner)}.` });
+    [['180', '💥', 'Die erste 180'], ['highfinish', '🎯', 'Das erste 100+ Finish'], ['9darter', '✨', 'Der erste 9-Darter']].forEach(([type, icon, title]) => {
+      const t = TOURS.find((x) => PLAYER_NAMES.some((p) => (type === 'highfinish' ? highFinishes(x, p).length : eventCount(x, p, type)) > 0));
+      if (!t) return;
+      const who = PLAYER_NAMES.filter((p) => (type === 'highfinish' ? highFinishes(t, p).length : eventCount(t, p, type)) > 0);
+      ms.push({ t, icon, title, text: `${who.map(pLink).join(', ')} – für immer in den Geschichtsbüchern.` });
+    });
+    if (FIRST_DO && DO_NOTE) ms.push({ t: FIRST_DO, icon: '🎯', title: 'Beginn der Double-Out-Ära', text: `Ab jetzt wird auf Doppel ausgecheckt. Erster Double-Out-Champion: ${pLink(FIRST_DO.winner)}.` });
+    ms.sort((a, b) => a.t.nr - b.t.nr);
+    const milestones = `<ol class="milestones">${ms.map((m) => `
+      <li><span class="ms-icon" aria-hidden="true">${m.icon}</span>
+        <div><p class="ms-when">${tLink(m.t)} · ${dateShort(m.t.date)}</p><h3>${m.title}</h3><p>${m.text}</p></div></li>`).join('')}</ol>`;
+
+    // Rekordhalter
+    const whoT = (i) => `${pLink(i.p)} <span class="muted">· ${tLink(i.t)}</span>`;
+    const recs = [
+      recordCard('Höchster Score', best(STAT_ROWS.map((s) => ({ v: s.hs, p: s.p, t: s.t })), 'max'), (v) => v, whoT),
+      recordCard('Bester Turnier-Average', best(STAT_DO.map((s) => ({ v: s.avg, p: s.p, t: s.t })), 'max'), (v) => num(v, 2), whoT, DO_NOTE ? 'Double Out' : ''),
+      recordCard('Höchstes Finish', best(STAT_DO.map((s) => ({ v: s.hco, p: s.p, t: s.t })), 'max'), (v) => v, whoT, DO_NOTE ? 'Double Out' : ''),
+      recordCard('Kürzestes Leg', best(STAT_DO.map((s) => ({ v: s.minDarts, p: s.p, t: s.t })), 'min'), (v) => v + ' Darts', whoT, DO_NOTE ? 'Double Out' : '')
+    ].join('');
+
+    // Ballon-Dart-Könige (jeder einmal)
+    const ballonKings = [];
+    TOURS.filter((t) => t.ballonDart).forEach((t) => {
+      let k = ballonKings.find((x) => x.name === t.ballonDart);
+      if (!k) { k = { name: t.ballonDart, tours: [] }; ballonKings.push(k); }
+      k.tours.push(t);
+    });
+
+    // Noch ohne Gravur
+    const waiting = Object.values(AGG).filter((a) => a.entries.length && !a.titles).sort((a, b) => a.bestPlace - b.bestPlace || a.name.localeCompare(b.name));
+
+    return `
+    ${pageHead('Hall of Fame', 'Ruhmes<span class="hl">halle</span>', 'Hier steht, wer den heiligen Wanderpokal schon in den Händen hielt. Jeder Champion ist auf dem Sockel verewigt – das nächste Plättchen ist noch frei.')}
+    <section class="wrap section trophy-stage">
+      <div class="trophy-wrap">${trophySvg()}</div>
+      <div class="trophy-side">
+        ${spotlight}
+        <div class="panel">
+          <p class="kicker">Gravur-Service</p>
+          <p class="muted">Klick auf ein Plättchen öffnet das Turnier. Das leere Plättchen wartet auf den Champion der <strong>EA Masters ${roman((TOURS.length ? TOURS[TOURS.length - 1].nr : 0) + 1)}</strong>.</p>
+        </div>
+      </div>
+    </section>
+    <section class="wrap section">
+      ${sectionHead('Verewigt', 'Die Champions')}
+      <p class="muted small">Jeder Sieger einmal – in der Reihenfolge seines ersten Titels.</p>
+      <div class="champ-grid">${champTiles}</div>
+    </section>
+    <section class="wrap section">
+      ${sectionHead('Geschichte', 'Meilensteine')}
+      ${milestones}
+    </section>
+    ${recs ? `<section class="wrap section">
+      ${sectionHead('Rekordhalter', 'Für die Ewigkeit', `<a class="more" href="statistiken.html">Alle Rekorde ${ICON.arrow}</a>`)}
+      <div class="records">${recs}</div>
+    </section>` : ''}
+    <section class="wrap section split">
+      ${ballonKings.length ? `<div class="panel">
+        ${sectionHead('Nebentitel', '🎈 Ballon-Dart-Könige')}
+        <ul class="honor-list">${ballonKings.map((k) => `<li>${pLink(k.name)} <span class="muted">· ${k.tours.map((t) => t.roman).join(', ')}</span></li>`).join('')}</ul>
+      </div>` : ''}
+      ${waiting.length ? `<div class="panel">
+        ${sectionHead('Warteliste', 'Noch ohne Gravur')}
+        <p class="muted small">Der Graveur hat schon die Feile in der Hand. Bestes Ergebnis bisher:</p>
+        <ul class="honor-list">${waiting.map((a) => `<li>${pLink(a.name)} <span class="muted">· ${a.bestPlace}. Platz</span></li>`).join('')}</ul>
+      </div>` : ''}
     </section>`;
   }
 
@@ -1015,7 +1184,7 @@
     renderChrome();
     const page = document.body.dataset.page;
     const app = $('#app');
-    const R = { home: renderHome, turniere: renderTurniere, turnier: renderTurnier, statistiken: renderStatistiken, spieler: renderSpieler };
+    const R = { home: renderHome, turniere: renderTurniere, turnier: renderTurnier, statistiken: renderStatistiken, ruhmeshalle: renderRuhmeshalle, spieler: renderSpieler };
     if (app && R[page]) app.innerHTML = R[page]();
     if (page === 'verein') fillVerein();
     if (page === 'home') startClock();
