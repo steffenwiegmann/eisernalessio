@@ -456,7 +456,7 @@
       <div class="panel">
         ${sectionHead('Ehrentafel', 'Die Sieger')}
         <ol class="honor">
-          ${TOURS.slice().reverse().map((t) => `<li><a href="${t.url}"><span class="honor-t">${t.roman}</span><span class="honor-n">${esc(t.winner)}</span><span class="honor-d">${dateShort(t.date)}</span></a></li>`).join('')}
+          ${TOURS.map((t) => `<li><a href="${t.url}"><span class="honor-t">${t.roman}</span><span class="honor-n">${esc(t.winner)}</span><span class="honor-d">${dateShort(t.date)}</span></a></li>`).join('')}
         </ol>
         <a class="more" href="statistiken.html">Ewige Tabelle &amp; Rekorde ${ICON.arrow}</a>
       </div>
@@ -782,7 +782,7 @@
 
     const honor = table(
       [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Ort' }, { l: '🏆 Sieger' }, { l: 'Finalist' }, { l: 'Platz 3' }, { l: '🎈 Ballon Dart' }],
-      TOURS.slice().reverse().map((t) => `<tr>
+      TOURS.map((t) => `<tr>
         <td>${tLink(t)}</td><td class="num">${dateShort(t.date)}</td><td>${esc(t.venue)}</td>
         <td class="strong">${t.placements[0] ? pLink(t.placements[0]) : '–'}</td>
         <td>${t.placements[1] ? pLink(t.placements[1]) : '–'}</td>
