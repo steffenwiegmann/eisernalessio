@@ -1,0 +1,4 @@
+# GitHub Pages (Jekyll): Diese Dateien gehören ins Repository, aber nicht auf die Website.
+exclude:
+  - druck
+  - CLAUDE.md
