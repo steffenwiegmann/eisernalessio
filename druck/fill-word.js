@@ -66,7 +66,7 @@ function fillFor(t, next) {
   const maxLegs = gm.reduce((m, x) => Math.max(m, x.s1, x.s2), 0);
   const groupBo = maxLegs ? String(2 * maxLegs - 1) : '';
   const toRow = (m, nr) => ({
-    nr, a: codeOf(m.p1), b: codeOf(m.p2), s1: m.s1, s2: m.s2,
+    nr, a: codeOf(m.p1), b: codeOf(m.p2), pa: m.p1, pb: m.p2, s1: m.s1, s2: m.s2,
     a1: m.a1 != null ? m.a1 : null, a2: m.a2, n1: m.n1, n2: m.n2, sc1: m.sc1, sc2: m.sc2,
     rest: typeof m.d1 === 'number' ? String(Math.abs(m.d1)) : ''
   });

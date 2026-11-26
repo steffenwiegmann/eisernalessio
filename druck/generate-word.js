@@ -463,7 +463,9 @@ function page3(n, f) {
       if (!list.length) rows.push(row([cell(para(run('Keine Daten zur Gruppenphase vorhanden', { size: 15, color: GREY, italics: true })), total, { span: 14 })], 350));
       list.forEach((m) => {
         if (m.sep) { rows.push(sep(m.sep)); return; }
-        rows.push(line(m.nr, `${m.a}  –  ${m.b}`, vals({ darts: [m.n1, m.n2], avg: [m.a1, m.a2], sc: [m.sc1, m.sc2] })));
+        // Ergebnisdokument: echte Spielernamen (Sieger fett), Vorlage: Platzcodes
+        const spiel = m.pa ? [run(m.pa, { bold: m.s1 > m.s2, size: 17 }), run('  –  ', { color: GREY }), run(m.pb, { bold: m.s2 > m.s1, size: 17 })] : `${m.a}  –  ${m.b}`;
+        rows.push(line(m.nr, spiel, vals({ darts: [m.n1, m.n2], avg: [m.a1, m.a2], sc: [m.sc1, m.sc2] })));
       });
     } else {
       roundRobin(g.size, g.double).forEach(([a, b], i) => rows.push(line(i + 1, `${code(a)}  –  ${code(b)}`)));
