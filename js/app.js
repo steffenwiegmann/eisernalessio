@@ -245,10 +245,10 @@
     ['index.html', 'Start', 'home'],
     ['eamasters.html', 'Turniere', 'turniere'],
     ['statistiken.html', 'Statistiken', 'statistiken'],
-    ['ruhmeshalle.html', 'Ruhmeshalle', 'ruhmeshalle'],
     ['spieler.html', 'Spieler', 'spieler'],
     ['eamastersrules.html', 'Regeln', 'regeln'],
-    ['club.html', 'Verein', 'verein']
+    ['club.html', 'Verein', 'verein'],
+    ['ruhmeshalle.html', 'Ruhmeshalle', 'ruhmeshalle']
   ];
 
   function renderChrome() {
