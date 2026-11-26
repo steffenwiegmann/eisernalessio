@@ -244,8 +244,8 @@
   const NAV = [
     ['index.html', 'Start', 'home'],
     ['eamasters.html', 'Turniere', 'turniere'],
-    ['statistiken.html', 'Statistiken', 'statistiken'],
     ['spieler.html', 'Spieler', 'spieler'],
+    ['statistiken.html', 'Statistiken', 'statistiken'],
     ['eamastersrules.html', 'Regeln', 'regeln'],
     ['club.html', 'Verein', 'verein'],
     ['ruhmeshalle.html', 'Ruhmeshalle', 'ruhmeshalle']
@@ -695,8 +695,8 @@
             return `<div class="group">
               <h3>${esc(g.name)}</h3>
               ${table(head, rows, 'standings')}
-              ${g.tiebreak ? `<p class="sub-h">Entscheidungsspiel</p>${matchTable(g.tiebreak)}` : ''}
               ${gm.length ? `<p class="sub-h">Gruppenspiele (${gm.length})</p>${matchTable(gm)}` : ''}
+              ${g.tiebreak ? `<p class="sub-h">Entscheidungsspiel</p>${matchTable(g.tiebreak)}` : ''}
             </div>`;
           }).join('')}
         </div>
@@ -900,11 +900,11 @@
         <p class="muted small">Mittelwert der Turnier-Averages${DO_NOTE ? ' ' + DO_NOTE : ''}.</p>
         ${barChart(avgRank, { min: avgMin })}
       </div>
-      <div class="panel">
+      ${players.some((a) => a.avgs.length > 1) ? `<div class="panel">
         ${sectionHead('Rangliste', 'Beste Turnier-Averages')}
         <p class="muted small">Die besten Einzelleistungen über ein ganzes Turnier${DO_NOTE ? ' ' + DO_NOTE : ''}.</p>
         ${barChart(bestAvgRank, { min: avgMin })}
-      </div>
+      </div>` : ''}
       <div class="panel">
         ${sectionHead('Rangliste', 'Match-Siegquote')}
         <p class="muted small">Alle Matches mit bekanntem Ergebnis, ab 4 Matches.</p>
@@ -1007,7 +1007,10 @@
 
     // Amtierender Champion
     const cur = won[won.length - 1];
-    const reignDays = cur ? Math.max(0, Math.floor((Date.now() - new Date(cur.date + 'T12:00:00').getTime()) / 86400000)) : 0;
+    // gleiche Zählung wie die Uhr auf der Startseite (ab Turnierbeginn, sonst ab Mitternacht)
+    const reignStart = cur ? parseDate(cur.date) : null;
+    if (cur && cur.time) { const [h, m] = cur.time.split(':').map(Number); reignStart.setHours(h, m || 0, 0, 0); }
+    const reignDays = cur ? Math.max(0, Math.floor((Date.now() - reignStart.getTime()) / 86400000)) : 0;
     const spotlight = cur ? `
       <div class="panel reign">
         <p class="kicker">Amtierender Champion</p>
