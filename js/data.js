@@ -22,7 +22,8 @@
  *    coHit / coAtt   Checkout-Treffer / -Versuche
  *    gp, gw   Games gespielt / gewonnen
  *    lp, lw   Legs gespielt / gewonnen
- *    s60, s100, s140, s180   Anzahl Aufnahmen 60+/100+/140+/180
+ *    s60, s100, s140, s180   Anzahl Aufnahmen wie bei Autodarts in Bereichen:
+ *             60–99 / 100–139 / 140–179 / 180 (jede Aufnahme zählt nur einmal)
  *
  *  Felder in Matches (Gruppe & Endrunde):
  *    p1, p2   Spieler,   s1, s2  Legs
@@ -33,6 +34,9 @@
  *             zusammen mit a1/a2 bei allen Matches eines Spielers
  *             vorhanden, berechnet die Website den Turnier-Average
  *             exakt (Summe Ø × Darts ÷ Summe Darts).
+ *    sc1, sc2 Aufnahmen im Match laut Autodarts als [60–99, 100–139, 140–179, 180]
+ *             (optional). Sind sie bei allen Matches eines Spielers vorhanden,
+ *             werden s60/s100/s140/s180 in stats daraus berechnet.
  *
  *  Weitere Felder pro Turnier (alle optional):
  *    time     Startzeit 'HH:MM' (für die Uhr „Seit dem letzten Turnier“)
@@ -164,46 +168,46 @@ window.EA_DATA = {
         {
           name: 'Gruppe B',
           standings: [
-            { p: 'Fynn',    legs: '4-2', diff: 331 },
-            { p: 'Quaasus', legs: '4-2', diff: 55 },
+            { p: 'Fynn',    legs: '4-2', diff: 330 },
+            { p: 'Quaasus', legs: '4-2', diff: 56 },
             { p: 'Samier',  legs: '1-5', diff: -386 }
           ]
         }
       ],
       groupMatches: [
-        { p1: 'Hugo',    p2: 'Sweaty',  s1: 0, s2: 1, d1: -43 },
-        { p1: 'Quaasus', p2: 'Fynn',    s1: 0, s2: 1, d1: -209 },
-        { p1: 'Katsche', p2: 'Hugo',    s1: 0, s2: 1, d1: -254 },
-        { p1: 'Fynn',    p2: 'Samier',  s1: 1, s2: 0, d1: 147 },
-        { p1: 'Katsche', p2: 'Sweaty',  s1: 0, s2: 1, d1: -14 },
-        { p1: 'Samier',  p2: 'Quaasus', s1: 0, s2: 1, d1: -23 },
-        { p1: 'Sweaty',  p2: 'Hugo',    s1: 1, s2: 0, d1: 167 },
-        { p1: 'Fynn',    p2: 'Quaasus', s1: 0, s2: 1, d1: -169 },
-        { p1: 'Hugo',    p2: 'Katsche', s1: 0, s2: 1, d1: -267 },
-        { p1: 'Samier',  p2: 'Fynn',    s1: 0, s2: 1, d1: -48 },
-        { p1: 'Sweaty',  p2: 'Katsche', s1: 0, s2: 1, d1: -112 },
-        { p1: 'Quaasus', p2: 'Samier',  s1: 1, s2: 0, d1: 50 },
-        { p1: 'Hugo',    p2: 'Sweaty',  s1: 0, s2: 1, d1: -28 },
-        { p1: 'Quaasus', p2: 'Fynn',    s1: 1, s2: 0, d1: 86 },
-        { p1: 'Katsche', p2: 'Hugo',    s1: 0, s2: 1, d1: -32 },
-        { p1: 'Fynn',    p2: 'Samier',  s1: 1, s2: 0, d1: 182 },
-        { p1: 'Katsche', p2: 'Sweaty',  s1: 1, s2: 0, d1: 207 },
-        { p1: 'Samier',  p2: 'Quaasus', s1: 1, s2: 0, d1: 64 }
+        { p1: 'Hugo',    p2: 'Sweaty',  s1: 0, s2: 1, d1: -43, a1: 50.89, a2: 50.10, n1: 27, n2: 30, sc1: [3, 0, 0, 0], sc2: [2, 1, 0, 0] },
+        { p1: 'Quaasus', p2: 'Fynn',    s1: 0, s2: 1, d1: -209, a1: 36.50, a2: 55.67, n1: 24, n2: 27, sc1: [1, 0, 0, 0], sc2: [3, 1, 0, 0] },
+        { p1: 'Katsche', p2: 'Hugo',    s1: 0, s2: 1, d1: -254, a1: 35.29, a2: 65.35, n1: 21, n2: 23, sc1: [1, 0, 0, 0], sc2: [3, 0, 1, 0] },
+        { p1: 'Fynn',    p2: 'Samier',  s1: 1, s2: 0, d1: 147, a1: 60.12, a2: 44.25, n1: 25, n2: 24, sc1: [2, 2, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Katsche', p2: 'Sweaty',  s1: 0, s2: 1, d1: -14, a1: 48.70, a2: 46.97, n1: 30, n2: 32, sc1: [2, 2, 0, 0], sc2: [2, 1, 0, 0] },
+        { p1: 'Samier',  p2: 'Quaasus', s1: 0, s2: 1, d1: -23, a1: 43.45, a2: 44.21, n1: 33, n2: 34, sc1: [2, 0, 0, 0], sc2: [3, 0, 0, 0] },
+        { p1: 'Sweaty',  p2: 'Hugo',    s1: 1, s2: 0, d1: 167, a1: 51.83, a2: 37.11, n1: 29, n2: 27, sc1: [5, 0, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Fynn',    p2: 'Quaasus', s1: 0, s2: 1, d1: -169, a1: 33.20, a2: 48.48, n1: 30, n2: 31, sc1: [1, 0, 0, 0], sc2: [4, 0, 0, 0] },
+        { p1: 'Hugo',    p2: 'Katsche', s1: 0, s2: 1, d1: -267, a1: 33.43, a2: 71.57, n1: 21, n2: 21, sc1: [0, 0, 0, 0], sc2: [2, 2, 0, 0] },
+        { p1: 'Samier',  p2: 'Fynn',    s1: 0, s2: 1, d1: -48, a1: 34.85, a2: 40.62, n1: 39, n2: 37, sc1: [1, 0, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Sweaty',  p2: 'Katsche', s1: 0, s2: 1, d1: -112, a1: 48.63, a2: 57.81, n1: 24, n2: 26, sc1: [1, 1, 0, 0], sc2: [2, 2, 0, 0] },
+        { p1: 'Quaasus', p2: 'Samier',  s1: 1, s2: 0, d1: 50, a1: 38.54, a2: 34.69, n1: 39, n2: 39, sc1: [1, 0, 0, 0], sc2: [1, 0, 0, 0] },
+        { p1: 'Hugo',    p2: 'Sweaty',  s1: 0, s2: 1, d1: -28, a1: 43.00, a2: 46.97, n1: 33, n2: 32, sc1: [2, 0, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Quaasus', p2: 'Fynn',    s1: 1, s2: 0, d1: 87, a1: 55.67, a2: 46.00, n1: 27, n2: 27, sc1: [5, 0, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Katsche', p2: 'Hugo',    s1: 0, s2: 1, d1: -32, a1: 52.11, a2: 53.68, n1: 27, n2: 28, sc1: [2, 0, 0, 0], sc2: [3, 1, 0, 0] },
+        { p1: 'Fynn',    p2: 'Samier',  s1: 1, s2: 0, d1: 182, a1: 62.63, a2: 45.57, n1: 24, n2: 21, sc1: [4, 1, 0, 0], sc2: [1, 0, 0, 0] },
+        { p1: 'Katsche', p2: 'Sweaty',  s1: 1, s2: 0, d1: 207, a1: 51.83, a2: 32.67, n1: 29, n2: 27, sc1: [2, 0, 1, 0], sc2: [0, 0, 0, 0] },
+        { p1: 'Samier',  p2: 'Quaasus', s1: 1, s2: 0, d1: 64, a1: 44.21, a2: 39.73, n1: 34, n2: 33, sc1: [3, 0, 0, 0], sc2: [1, 0, 0, 0] }
       ],
       knockout: [
-        { round: 'Halbfinale', bo: 3, p1: 'Fynn',    p2: 'Katsche', s1: 1, s2: 2, a1: 54.70, a2: 57.16 },
-        { round: 'Halbfinale', bo: 3, p1: 'Quaasus', p2: 'Sweaty',  s1: 2, s2: 0, a1: 51.83, a2: 39.16 },
-        { round: 'Spiel um Platz 5', bo: 3, p1: 'Hugo', p2: 'Samier', s1: 2, s2: 0, a1: 53.68, a2: 33.22 },
-        { round: 'Spiel um Platz 3', bo: 3, p1: 'Sweaty', p2: 'Fynn', s1: 0, s2: 2, a1: 45.40, a2: 68.32 },
-        { round: 'Finale', bo: 5, p1: 'Katsche', p2: 'Quaasus', s1: 3, s2: 1, a1: 47.47, a2: 41.19 }
+        { round: 'Halbfinale', bo: 3, p1: 'Fynn',    p2: 'Katsche', s1: 1, s2: 2, a1: 54.70, a2: 57.16, n1: 77, n2: 77, sc1: [12, 2, 0, 0], sc2: [6, 3, 0, 0] },
+        { round: 'Halbfinale', bo: 3, p1: 'Quaasus', p2: 'Sweaty',  s1: 2, s2: 0, a1: 51.83, a2: 39.16, n1: 58, n2: 57, sc1: [4, 0, 0, 1], sc2: [2, 0, 0, 0] },
+        { round: 'Spiel um Platz 5', bo: 3, p1: 'Hugo', p2: 'Samier', s1: 2, s2: 0, a1: 53.68, a2: 33.22, n1: 56, n2: 54, sc1: [4, 1, 0, 0], sc2: [1, 0, 0, 0] },
+        { round: 'Spiel um Platz 3', bo: 3, p1: 'Sweaty', p2: 'Fynn', s1: 0, s2: 2, a1: 45.40, a2: 68.32, n1: 45, n2: 44, sc1: [4, 0, 0, 0], sc2: [6, 0, 1, 0] },
+        { round: 'Finale', bo: 5, p1: 'Katsche', p2: 'Quaasus', s1: 3, s2: 1, a1: 47.41, a2: 41.19, n1: 122, n2: 119, sc1: [11, 1, 0, 0], sc2: [6, 1, 0, 0] }
       ],
       stats: [
-        { p: 'Katsche', avg: 51.84, hs: 140, hco: 46,  minDarts: 21 },
-        { p: 'Quaasus', avg: 44.13, hs: 180, hco: 81,  minDarts: 24 },
-        { p: 'Fynn',    avg: 53.03, hs: 140, hco: 95,  minDarts: 19 },
-        { p: 'Sweaty',  avg: 44.70, hs: 121, hco: 38,  minDarts: 29 },
-        { p: 'Hugo',    avg: 48.88, hs: 140, hco: 114, minDarts: 23 },
-        { p: 'Samier',  avg: 38.78, hs: 92,  hco: 14,  minDarts: 34 }
+        { p: 'Katsche', avg: 51.85, hs: 140, hco: 46,  minDarts: 21, s60: 28, s100: 10, s140: 1, s180: 0 },
+        { p: 'Quaasus', avg: 44.13, hs: 180, hco: 81,  minDarts: 24, s60: 25, s100: 1,  s140: 0, s180: 1 },
+        { p: 'Fynn',    avg: 53.15, hs: 140, hco: 95,  minDarts: 19, s60: 32, s100: 6,  s140: 1, s180: 0 },
+        { p: 'Sweaty',  avg: 44.70, hs: 121, hco: 38,  minDarts: 29, s60: 18, s100: 3,  s140: 0, s180: 0 },
+        { p: 'Hugo',    avg: 48.88, hs: 140, hco: 114, minDarts: 23, s60: 17, s100: 2,  s140: 1, s180: 0 },
+        { p: 'Samier',  avg: 38.78, hs: 92,  hco: 14,  minDarts: 34, s60: 11, s100: 0,  s140: 0, s180: 0 }
       ]
     },
 
@@ -234,38 +238,38 @@ window.EA_DATA = {
             { p: 'Quaasus', games: '2-2', legs: '4-5' }
           ],
           tiebreak: [
-            { p1: 'Hugo', p2: 'Quaasus', s1: 1, s2: 0, a1: 46.97, a2: 48.70, c1: '1/2', c2: '0/3' }
+            { p1: 'Hugo', p2: 'Quaasus', s1: 1, s2: 0, a1: 46.97, a2: 48.70, c1: '1/2', c2: '0/3', n1: 32, n2: 30, sc1: [3, 0, 0, 0], sc2: [3, 1, 0, 0] }
           ]
         }
       ],
       groupMatches: [
-        { p1: 'Reto',    p2: 'Sweaty',  s1: 2, s2: 1, a1: 34.57, a2: 35.08, c1: '2/33', c2: '1/31' },
-        { p1: 'Hugo',    p2: 'Quaasus', s1: 2, s2: 0, a1: 38.54, a2: 37.77, c1: '2/16', c2: '0/15' },
-        { p1: 'Sweaty',  p2: 'Fynn',    s1: 0, s2: 2, a1: 38.19, a2: 46.97, c1: '0/0',  c2: '2/16' },
-        { p1: 'Quaasus', p2: 'Katsche', s1: 0, s2: 2, a1: 44.21, a2: 52.74, c1: '0/0',  c2: '2/5' },
-        { p1: 'Fynn',    p2: 'Reto',    s1: 2, s2: 0, a1: 46.97, a2: 32.90, c1: '2/6',  c2: '0/0' },
-        { p1: 'Katsche', p2: 'Hugo',    s1: 1, s2: 2, a1: 54.11, a2: 49.94, c1: '1/8',  c2: '2/6' },
-        { p1: 'Sweaty',  p2: 'Reto',    s1: 1, s2: 2, a1: 39.73, a2: 41.47, c1: '1/25', c2: '2/12' },
-        { p1: 'Quaasus', p2: 'Hugo',    s1: 2, s2: 0, a1: 41.18, a2: 39.58, c1: '2/22', c2: '0/7' },
-        { p1: 'Fynn',    p2: 'Sweaty',  s1: 2, s2: 0, a1: 58.94, a2: 35.44, c1: '2/14', c2: '0/0' },
-        { p1: 'Katsche', p2: 'Quaasus', s1: 1, s2: 2, a1: 44.26, a2: 49.33, c1: '1/9',  c2: '2/16' },
-        { p1: 'Reto',    p2: 'Fynn',    s1: 0, s2: 2, a1: 31.29, a2: 35.79, c1: '0/5',  c2: '2/32' },
-        { p1: 'Hugo',    p2: 'Katsche', s1: 0, s2: 2, a1: 42.74, a2: 50.95, c1: '0/5',  c2: '2/5' }
+        { p1: 'Reto',    p2: 'Sweaty',  s1: 2, s2: 1, a1: 34.57, a2: 35.08, c1: '2/33', c2: '1/31', n1: 130, n2: 127, sc1: [2, 3, 0, 0], sc2: [5, 1, 0, 0] },
+        { p1: 'Hugo',    p2: 'Quaasus', s1: 2, s2: 0, a1: 38.54, a2: 37.77, c1: '2/16', c2: '0/15', n1: 78, n2: 78, sc1: [2, 0, 2, 0], sc2: [2, 1, 0, 0] },
+        { p1: 'Sweaty',  p2: 'Fynn',    s1: 0, s2: 2, a1: 38.19, a2: 46.97, c1: '0/0', c2: '2/16', n1: 63, n2: 64, sc1: [3, 0, 0, 0], sc2: [6, 1, 1, 0] },
+        { p1: 'Quaasus', p2: 'Katsche', s1: 0, s2: 2, a1: 44.21, a2: 52.74, c1: '0/0', c2: '2/5', n1: 57, n2: 57, sc1: [4, 0, 0, 0], sc2: [5, 1, 0, 0] },
+        { p1: 'Fynn',    p2: 'Reto',    s1: 2, s2: 0, a1: 46.97, a2: 32.90, c1: '2/6', c2: '0/0', n1: 64, n2: 63, sc1: [4, 2, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Katsche', p2: 'Hugo',    s1: 1, s2: 2, a1: 54.11, a2: 49.94, c1: '1/8', c2: '2/6', n1: 80, n2: 79, sc1: [4, 5, 0, 0], sc2: [9, 1, 0, 0] },
+        { p1: 'Sweaty',  p2: 'Reto',    s1: 1, s2: 2, a1: 39.73, a2: 41.47, c1: '1/25', c2: '2/12', n1: 111, n2: 108, sc1: [7, 1, 0, 0], sc2: [5, 1, 0, 0] },
+        { p1: 'Quaasus', p2: 'Hugo',    s1: 2, s2: 0, a1: 41.18, a2: 39.58, c1: '2/22', c2: '0/7', n1: 73, n2: 72, sc1: [3, 2, 1, 0], sc2: [2, 2, 0, 0] },
+        { p1: 'Fynn',    p2: 'Sweaty',  s1: 2, s2: 0, a1: 58.94, a2: 35.44, c1: '2/14', c2: '0/0', n1: 51, n2: 48, sc1: [7, 4, 0, 0], sc2: [2, 0, 0, 0] },
+        { p1: 'Katsche', p2: 'Quaasus', s1: 1, s2: 2, a1: 44.26, a2: 49.33, c1: '1/9', c2: '2/16', n1: 85, n2: 88, sc1: [4, 1, 1, 0], sc2: [5, 5, 0, 0] },
+        { p1: 'Reto',    p2: 'Fynn',    s1: 0, s2: 2, a1: 31.29, a2: 35.79, c1: '0/5', c2: '2/23', n1: 84, n2: 84, sc1: [5, 0, 0, 0], sc2: [5, 1, 0, 0] },
+        { p1: 'Hugo',    p2: 'Katsche', s1: 0, s2: 2, a1: 42.74, a2: 50.95, c1: '0/5', c2: '2/5', n1: 57, n2: 59, sc1: [6, 0, 0, 0], sc2: [6, 1, 0, 0] }
       ],
       knockout: [
-        { round: 'Halbfinale', bo: 5, p1: 'Katsche', p2: 'Reto', s1: 3, s2: 0, a1: 46.01, a2: 37.22, c1: '3/13', c2: '0/1' },
-        { round: 'Halbfinale', bo: 5, p1: 'Fynn',    p2: 'Hugo', s1: 3, s2: 2, a1: 35.65, a2: 36.93, c1: '1/45', c2: '2/35' },
-        { round: 'Spiel um Platz 5', bo: 3, p1: 'Quaasus', p2: 'Sweaty', s1: 0, s2: 2, a1: 37.42, a2: 40.60, c1: '0/13', c2: '2/3' },
-        { round: 'Spiel um Platz 3', bo: 3, p1: 'Hugo', p2: 'Reto', s1: 2, s2: 1, a1: 30.85, a2: 30.70, c1: '2/43', c2: '1/20' },
-        { round: 'Finale', bo: 5, p1: 'Fynn', p2: 'Katsche', s1: 3, s2: 0, a1: 48.48, a2: 46.77, c1: '3/15', c2: '0/20' }
+        { round: 'Halbfinale', bo: 5, p1: 'Katsche', p2: 'Reto', s1: 3, s2: 0, a1: 46.01, a2: 37.22, c1: '3/13', c2: '0/1', n1: 98, n2: 96, sc1: [9, 1, 0, 0], sc2: [3, 0, 0, 0] },
+        { round: 'Halbfinale', bo: 5, p1: 'Fynn',    p2: 'Hugo', s1: 3, s2: 2, a1: 35.65, a2: 36.93, c1: '1/45', c2: '2/35', n1: 121, n2: 120, sc1: [7, 2, 0, 0], sc2: [4, 3, 1, 0] },
+        { round: 'Spiel um Platz 5', bo: 3, p1: 'Quaasus', p2: 'Sweaty', s1: 0, s2: 2, a1: 37.42, a2: 40.62, c1: '0/13', c2: '2/3', n1: 72, n2: 74, sc1: [6, 0, 0, 0], sc2: [4, 0, 0, 0] },
+        { round: 'Spiel um Platz 3', bo: 3, p1: 'Hugo', p2: 'Reto', s1: 2, s2: 1, a1: 30.85, a2: 30.70, c1: '2/43', c2: '1/20', n1: 145, n2: 142, sc1: [5, 0, 0, 0], sc2: [4, 0, 0, 0] },
+        { round: 'Finale', bo: 5, p1: 'Fynn', p2: 'Katsche', s1: 3, s2: 0, a1: 48.48, a2: 46.77, c1: '3/15', c2: '0/20', n1: 93, n2: 90, sc1: [6, 1, 1, 0], sc2: [9, 2, 1, 0] }
       ],
       stats: [
-        { p: 'Fynn',    avg: 43.71, hs: 140, coHit: 12, coAtt: 128, hco: 49, minDarts: 21 },
-        { p: 'Katsche', avg: 48.63, hs: 140, coHit: 9,  coAtt: 60,  hco: 56, minDarts: 20 },
-        { p: 'Hugo',    avg: 38.82, hs: 143, coHit: 9,  coAtt: 114, hco: 35, minDarts: 29 },
-        { p: 'Reto',    avg: 34.68, hs: 133, coHit: 5,  coAtt: 71,  hco: 33, minDarts: 32 },
-        { p: 'Sweaty',  avg: 37.77, hs: 120, coHit: 4,  coAtt: 69,  hco: 48, minDarts: 32 },
-        { p: 'Quaasus', avg: 42.63, hs: 140, coHit: 4,  coAtt: 69,  hco: 40, minDarts: 27 }
+        { p: 'Fynn',    avg: 43.70, hs: 140, coHit: 12, coAtt: 119, hco: 49, minDarts: 21, s60: 35, s100: 11, s140: 2, s180: 0 },
+        { p: 'Katsche', avg: 48.66, hs: 140, coHit: 9,  coAtt: 60,  hco: 56, minDarts: 20, s60: 37, s100: 11, s140: 2, s180: 0 },
+        { p: 'Hugo',    avg: 38.84, hs: 143, coHit: 9,  coAtt: 114, hco: 35, minDarts: 29, s60: 31, s100: 6,  s140: 3, s180: 0 },
+        { p: 'Reto',    avg: 34.68, hs: 133, coHit: 5,  coAtt: 71,  hco: 33, minDarts: 32, s60: 21, s100: 4,  s140: 0, s180: 0 },
+        { p: 'Sweaty',  avg: 37.77, hs: 120, coHit: 4,  coAtt: 59,  hco: 48, minDarts: 32, s60: 21, s100: 2,  s140: 0, s180: 0 },
+        { p: 'Quaasus', avg: 42.63, hs: 140, coHit: 4,  coAtt: 69,  hco: 40, minDarts: 27, s60: 23, s100: 9,  s140: 1, s180: 0 }
       ],
       notes: ['Im Halbfinale Fynn – Hugo sind wegen Serverproblemen die Statistiken von zwei Legs verloren gegangen.']
     }

@@ -67,7 +67,7 @@ function fillFor(t, next) {
   const groupBo = maxLegs ? String(2 * maxLegs - 1) : '';
   const toRow = (m, nr) => ({
     nr, a: codeOf(m.p1), b: codeOf(m.p2), s1: m.s1, s2: m.s2,
-    a1: m.a1 != null ? m.a1 : null, a2: m.a2, n1: m.n1, n2: m.n2,
+    a1: m.a1 != null ? m.a1 : null, a2: m.a2, n1: m.n1, n2: m.n2, sc1: m.sc1, sc2: m.sc2,
     rest: typeof m.d1 === 'number' ? String(Math.abs(m.d1)) : ''
   });
   const games = {};
@@ -107,8 +107,8 @@ function fillFor(t, next) {
   const kos = t.knockout || [];
   const box = (m, seeds, flip) => {
     const o = flip
-      ? { names: [m.p2, m.p1], legs: [m.s2, m.s1], avg: [m.a2, m.a1], darts: [m.n2, m.n1] }
-      : { names: [m.p1, m.p2], legs: [m.s1, m.s2], avg: [m.a1, m.a2], darts: [m.n1, m.n2] };
+      ? { names: [m.p2, m.p1], legs: [m.s2, m.s1], avg: [m.a2, m.a1], darts: [m.n2, m.n1], sc: [m.sc2, m.sc1] }
+      : { names: [m.p1, m.p2], legs: [m.s1, m.s2], avg: [m.a1, m.a2], darts: [m.n1, m.n2], sc: [m.sc1, m.sc2] };
     return Object.assign(o, { bo: m.bo, seeds });
   };
   const winnerOf = (m) => (m.s1 > m.s2 ? m.p1 : m.p2);
@@ -151,8 +151,10 @@ function fillFor(t, next) {
     const s = stat(p) || {};
     const co = s.coAtt ? `${s.coHit}/${s.coAtt} (${de(s.coHit / s.coAtt * 100)} %)` : '';
     const md = s.minDarts ? `${s.minDarts} (${de(1503 / s.minDarts, 2)})` : '';
-    return [p, de(s.avg, 2), s.hs != null ? String(s.hs) : '', co, s.hco != null ? String(s.hco) : '', md];
+    const sc = ['s60', 's100', 's140', 's180'].map((k) => (typeof s[k] === 'number' ? String(s[k]) : ''));
+    return [p, de(s.avg, 2), s.hs != null ? String(s.hs) : '', co, s.hco != null ? String(s.hco) : '', md, ...sc];
   });
+  const tons = (s) => (['s100', 's140', 's180'].every((k) => typeof s[k] === 'number') ? s.s100 + s.s140 + s.s180 : null);
   const S = t.stats || [];
   const bestOf = (get, dir, show) => {
     const vals = S.map((s) => ({ p: s.p, v: get(s) })).filter((x) => typeof x.v === 'number' && isFinite(x.v));
@@ -165,16 +167,11 @@ function fillFor(t, next) {
     bestOf((s) => s.hs, 'max', String),
     bestOf((s) => (s.coAtt ? s.coHit / s.coAtt : null), 'max', (v) => `${de(v * 100)} %`),
     bestOf((s) => s.hco, 'max', String),
-    bestOf((s) => s.minDarts, 'min', (v) => `${v} (${de(1503 / v, 2)})`)
+    bestOf((s) => s.minDarts, 'min', (v) => `${v} (${de(1503 / v, 2)})`),
+    bestOf(tons, 'max', (v) => `${v}×`)
   ];
 
   const moments = (t.notes || []).slice();
-  const counts = S.filter((s) => s.s60 != null);
-  if (counts.length) {
-    const parts = counts.map((s) => `${s.p} ${s.s60}/${s.s100}/${s.s140}/${s.s180}`);
-    moments.push('Aufnahmen 60+ / 100+ / 140+ / 180: ' + parts.slice(0, 3).join(' · '));
-    if (parts.length > 3) moments.push('Aufnahmen 60+ / 100+ / 140+ / 180 (Forts.): ' + parts.slice(3).join(' · '));
-  }
   const gw = S.filter((s) => s.gp != null);
   if (gw.length) moments.push('Games/Legs gewonnen: ' + gw.map((s) => `${s.p} ${de(s.gw)}/${de(s.gp)} · ${de(s.lw)}/${de(s.lp)}`).join(' · '));
   S.filter((s) => s.hs === 180).forEach((s) => moments.push(`💥 180 geworfen: ${s.p}`));

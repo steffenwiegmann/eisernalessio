@@ -1,5 +1,5 @@
 /*
- * Erzeugt die Turnierplan-Vorlagen als Word-Dateien (DIN A4, je 2 Seiten).
+ * Erzeugt die Turnierplan-Vorlagen als Word-Dateien (DIN A4, je 3 Seiten).
  *   cd druck && npm install && node generate-word.js
  * Ergebnis: druck/EA-Masters-Turnierplan-<n>-Spieler.docx
  */
@@ -384,25 +384,30 @@ function page2(n) {
   const honors = table([2400, cw - 2400 - SAFE], ['🏆 Turniersieger', '🎈 Ballon-Dart-Sieger', '🏠 Nächster Ausrichter', '🤷 Beste Ausrede'].map((t, i) =>
     row([cell(para(run(t.toUpperCase(), { bold: true, size: 14, spacing: 10 })), 2400, { vAlign: VerticalAlign.BOTTOM }), lineCell(cw - 2400 - SAFE, F && F.honors[i])], 500)));
 
-  const sw = [2546 - SAFE, 1300, 1400, 2000, 1500, 1800];
+  // Spieler | Avg | Highest Score | Checkout | Highest Checkout | Minimum Darts | 60+ | 100+ | 140+ | 180
+  const sw = [1846 - SAFE, 1000, 950, 1750, 1000, 1300, 660, 660, 660, 660];
+  const tight = { top: 20, bottom: 20, left: 40, right: 40 };
+  const thc = (text, w) => cell(para(run(text.toUpperCase(), { bold: true, size: 13, color: YELLOW, spacing: 10 }), { align: AlignmentType.CENTER }), w, { fill: BLACK, margins: tight });
   const statsHead = row([
-    th('Spieler', sw[0]), th('3-Darts Avg', sw[1], { align: AlignmentType.CENTER }), th('Highest Score', sw[2], { align: AlignmentType.CENTER }),
-    th('Checkout (Treffer/Vers., %)', sw[3], { align: AlignmentType.CENTER }), th('Highest Checkout', sw[4], { align: AlignmentType.CENTER }),
-    th('Minimum Darts (Avg)', sw[5], { align: AlignmentType.CENTER })
+    th('Spieler', sw[0]), thc('3-Darts Avg', sw[1]), thc('Highest Score', sw[2]),
+    thc('Checkout (Treffer/Vers., %)', sw[3]), thc('Highest Checkout', sw[4]),
+    thc('Minimum Darts (Avg)', sw[5]),
+    ...['60+', '100+', '140+', '180'].map((l, i) => cell(para(run(l, { bold: true, size: 17, color: BLACK }), { align: AlignmentType.CENTER }), sw[6 + i], { fill: YELLOW, margins: tight }))
   ], null, { header: true });
   const stats = table(sw, [statsHead].concat(Array.from({ length: n }, (_, r) => row(sw.map((w, c) => {
     const v = F && F.stats[r] ? F.stats[r][c] : '';
-    return cell(para(fv(v), F && c ? { align: AlignmentType.CENTER } : {}), w);
+    return cell(para(fv(v), F && c ? { align: AlignmentType.CENTER } : {}), w, c >= 6 ? { margins: tight } : {});
   }), 430))), { borders: GRID });
+  const statsNote = para(run('60+ = Aufnahmen mit 60–99 · 100+ = 100–139 · 140+ = 140–179 Punkten · 180 extra (wie bei Autodarts). Summe der Matches von Blatt 3.', { size: 13, color: GREY }), { before: 60 });
 
   const bw = [3500, 2500, W - 6000 - SAFE];
   const bests = table(bw, [row([th('Kategorie', bw[0]), th('Wert', bw[1], { align: AlignmentType.CENTER }), th('Spieler', bw[2])], null, { header: true })].concat(
-    ['3-Dart Average', 'Highest Score', 'Checkout (%)', 'Highest Checkout', 'Minimum Darts (Avg)'].map((k, i) =>
+    ['3-Dart Average', 'Highest Score', 'Checkout (%)', 'Highest Checkout', 'Minimum Darts (Avg)', 'Meiste Tonnen (100+)'].map((k, i) =>
       row([cell(para(run(k, { bold: true })), bw[0]),
         cell(para(fv(F && F.bests[i] ? F.bests[i][0] : ''), F ? { align: AlignmentType.CENTER } : {}), bw[1]),
         cell(para(fv(F && F.bests[i] ? F.bests[i][1] : '')), bw[2])], 420))), { borders: GRID });
 
-  const momentLines = Math.max(2, 10 - n, F ? F.moments.length : 0);
+  const momentLines = Math.max(2, 8 - n, F ? F.moments.length : 0);
   return [
     ...band(n, 2),
     table([cw, gap, cw], [row([
@@ -411,7 +416,7 @@ function page2(n) {
       cell([heading('Ehrungen'), honors], cw, { vAlign: VerticalAlign.TOP, margins: zero })
     ])]),
     spacer(10),
-    heading('Statistiken – Gesamtturnier'), stats, spacer(10),
+    heading('Statistiken – Gesamtturnier'), stats, statsNote, spacer(10),
     heading('Bestwerte des Turniers'), bests, spacer(10),
     heading('Besondere Momente', 'Robin Hood, 180er, Dartitis, legendäre Sprüche …'),
     table([W], Array.from({ length: momentLines }, (_, i) => row([cell(para(F && F.moments[i] ? run(F.moments[i], { size: 16 }) : run('')), W)], 430)), { borders: { top: NONE, left: NONE, right: NONE, bottom: thin(), insideHorizontal: thin(), insideVertical: NONE } }),
@@ -423,31 +428,42 @@ function page2(n) {
    Blatt 3 – Autodarts-Protokoll (Darts + Ø je Spieler und Match)
    --------------------------------------------------------- */
 function page3(n, f) {
-  const w = [600, 3486 - SAFE, 1600, 1600, 1600, 1600];
+  // Je Spieler: Darts | Ø | 60+ | 100+ | 140+ | 180
+  const pw = [700, 760, 560, 560, 560, 520];
+  const w = [440, W - SAFE - 440 - 2 * pw.reduce((s, v) => s + v, 0)].concat(pw, pw);
   const total = w.reduce((s, v) => s + v, 0);
-  const head = new TableRow({ tableHeader: true, children: [
+  const tight = { top: 20, bottom: 20, left: 30, right: 30 };
+  const P2 = 'FAFAF7'; // Spieler 2 leicht abgesetzt
+  const pLabels = ['Darts', 'Ø', '60+', '100+', '140+', '180'];
+  const subHead = (l, i, fill) => cell(para(run(l.toUpperCase(), { bold: true, size: i >= 2 ? 14 : 12, color: i >= 2 ? BLACK : YELLOW, spacing: 5 }), { align: AlignmentType.CENTER }), pw[i], { fill: i >= 2 ? fill : BLACK, margins: tight });
+  const head1 = new TableRow({ tableHeader: true, children: [
     th('Nr.', w[0]), th('Spiel', w[1]),
-    th('Darts Sp. 1', w[2], { align: AlignmentType.CENTER }), th('Ø Sp. 1', w[3], { align: AlignmentType.CENTER }),
-    th('Darts Sp. 2', w[4], { align: AlignmentType.CENTER }), th('Ø Sp. 2', w[5], { align: AlignmentType.CENTER })
+    cell(para(run('SPIELER 1 (LINKS)', { bold: true, size: 13, color: YELLOW, spacing: 10 }), { align: AlignmentType.CENTER }), pw.reduce((s, v) => s + v, 0), { fill: BLACK, span: 6 }),
+    cell(para(run('SPIELER 2 (RECHTS)', { bold: true, size: 13, color: YELLOW, spacing: 10 }), { align: AlignmentType.CENTER }), pw.reduce((s, v) => s + v, 0), { fill: BLACK, span: 6 })
   ] });
-  const sep = (t) => row([cell(para(run(t.toUpperCase(), { bold: true, size: 13, color: GREY, spacing: 15 })), total, { span: 6, fill: SOFT })], 260);
+  const head2 = new TableRow({ tableHeader: true, children: [
+    cell(para(run('')), w[0], { fill: BLACK }), cell(para(run('')), w[1], { fill: BLACK }),
+    ...pLabels.map((l, i) => subHead(l, i, YELLOW)),
+    ...pLabels.map((l, i) => subHead(l, i, 'FFE566'))
+  ] });
+  const sep = (t) => row([cell(para(run(t.toUpperCase(), { bold: true, size: 13, color: GREY, spacing: 15 })), total, { span: 14, fill: SOFT })], 240);
   const line = (nr, spiel, vals) => row([
     cell(para(run(String(nr || ''), { bold: true, color: GREY })), w[0]),
     cell(para(typeof spiel === 'string' ? run(spiel, { bold: true }) : spiel), w[1]),
-    ...[2, 3, 4, 5].map((i) => cell(para(vals ? fv(vals[i - 2]) : run(''), { align: AlignmentType.CENTER }), w[i]))
-  ], 400);
-  const rows = [head];
-  const twoGroups = f.groups.length === 2;
+    ...pw.concat(pw).map((cw, i) => cell(para(vals ? fv(vals[i], i % 6 === 1 ? { size: 15 } : {}) : run(''), { align: AlignmentType.CENTER }), cw, { margins: tight, fill: i >= 6 ? P2 : undefined }))
+  ], 380);
+  const vals = (o) => [o.darts[0], de(o.avg[0], 2), ...(o.sc[0] || ['', '', '', '']), o.darts[1], de(o.avg[1], 2), ...(o.sc[1] || ['', '', '', ''])].map((v) => (v == null ? '' : v));
+  const rows = [head1, head2];
   // Gruppenspiele – gleiche Nummerierung wie auf Blatt 1
   f.groups.forEach((g) => {
     rows.push(sep(g.name));
     const code = (i) => (g.code ? g.code + i : String.fromCharCode(64 + i));
     if (F) {
       const list = F.games[g.code] || [];
-      if (!list.length) rows.push(row([cell(para(run('Keine Daten zur Gruppenphase vorhanden', { size: 15, color: GREY, italics: true })), total, { span: 6 })], 350));
+      if (!list.length) rows.push(row([cell(para(run('Keine Daten zur Gruppenphase vorhanden', { size: 15, color: GREY, italics: true })), total, { span: 14 })], 350));
       list.forEach((m) => {
         if (m.sep) { rows.push(sep(m.sep)); return; }
-        rows.push(line(m.nr, `${m.a}  –  ${m.b}`, [m.n1 != null ? m.n1 : '', de(m.a1, 2), m.n2 != null ? m.n2 : '', de(m.a2, 2)]));
+        rows.push(line(m.nr, `${m.a}  –  ${m.b}`, vals({ darts: [m.n1, m.n2], avg: [m.a1, m.a2], sc: [m.sc1, m.sc2] })));
       });
     } else {
       roundRobin(g.size, g.double).forEach(([a, b], i) => rows.push(line(i + 1, `${code(a)}  –  ${code(b)}`)));
@@ -460,14 +476,14 @@ function page3(n, f) {
   ko.forEach(([label, a, b]) => {
     const m = F && F.ko[label];
     const names = m && m.names[0] ? `${m.names[0]} – ${m.names[1] || ''}` : `${a} – ${b}`;
-    rows.push(line('', [run(label + ':  ', { bold: true }), run(names, { color: m ? '111111' : GREY, size: m ? 18 : 16 })],
-      m ? [m.darts ? m.darts[0] : '', de(m.avg[0], 2), m.darts ? m.darts[1] : '', de(m.avg[1], 2)] : null));
+    rows.push(line('', [run(label + ':  ', { bold: true, size: 16 }), run(names, { color: m ? '111111' : GREY, size: m ? 16 : 15 })],
+      m ? vals({ darts: m.darts || [], avg: m.avg, sc: m.sc || [] }) : null));
   });
   return [
     ...band(n, 3),
-    para(run('Nach jedem Match aus Autodarts ablesen und eintragen: geworfene Darts und 3-Dart-Average (Ø) beider Spieler. Spieler 1 ist der links genannte Spieler.', { size: 16, color: GREY }), { after: 120 }),
+    para(run('Nach jedem Match aus Autodarts ablesen (Match-Statistik) und eintragen: geworfene Darts, 3-Dart-Average (Ø) und die Aufnahmen 60+ / 100+ / 140+ / 180 beider Spieler. Spieler 1 ist der links genannte Spieler.', { size: 15, color: GREY }), { after: 100 }),
     table(w, rows, { borders: GRID }),
-    note('Turnier-Average = Summe (Ø × Darts) ÷ Summe Darts – wird von der Website automatisch berechnet.')
+    note('60+ = 60–99 · 100+ = 100–139 · 140+ = 140–179 Punkte (Bereiche wie bei Autodarts). Turnier-Average = Summe (Ø × Darts) ÷ Summe Darts – rechnet die Website automatisch.')
   ];
 }
 

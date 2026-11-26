@@ -31,6 +31,12 @@
   --tint-strong: rgba(255, 212, 0, 0.16);
   --tint-mid: rgba(255, 212, 0, 0.10);
   --tint-weak: rgba(255, 212, 0, 0.02);
+  /* Scoring-Mix: unter 60 · 60–99 · 100–139 · 140–179 · 180 */
+  --mix-0: #2a2a2a;
+  --mix-1: rgba(255, 212, 0, 0.30);
+  --mix-2: rgba(255, 212, 0, 0.60);
+  --mix-3: #ffd400;
+  --mix-4: #f5f5f3;
   --header-bg: rgba(11, 11, 11, 0.86);
   --menu-bg: rgba(11, 11, 11, 0.98);
   --row-hover: rgba(255, 255, 255, 0.025);
@@ -528,6 +534,39 @@ p { margin: 0 0 1em; }
 .note-so { color: var(--muted); font-size: 14px; margin: -4px 0 16px; }
 .note-so .badge-so { margin-right: 6px; }
 .records-so .record { border-style: dashed; }
+
+/* Scoring: Aufnahmen 60+/100+/140+/180 */
+.score-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.score-tile {
+  position: relative; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 20px 16px;
+}
+.score-tile::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+  background: var(--mix-1);
+}
+.score-tile:nth-child(2)::after { background: var(--mix-2); }
+.score-tile:nth-child(3)::after { background: var(--mix-3); }
+.score-tile:nth-child(4)::after { background: var(--mix-4); }
+.score-label { font-family: var(--font-display); font-size: 26px; line-height: 1; color: var(--muted); letter-spacing: 0.04em; }
+.score-value { font-family: var(--font-display); font-size: clamp(48px, 6vw, 68px); line-height: 1; color: var(--accent-ink); font-variant-numeric: tabular-nums; margin: 6px 0 4px; }
+.score-sub { color: var(--faint); font-size: 13px; }
+.score-180 { border-color: var(--yellow-line); background: linear-gradient(160deg, var(--tint-strong), var(--surface) 60%); }
+.score-panel { margin-top: 16px; }
+.score-fun { margin: 16px 0 6px; font-size: 16px; }
+.score-mix { margin-top: 10px; }
+.mix-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+.mix-seg { display: block; height: 100%; width: var(--w); min-width: 3px; }
+.mix-seg + .mix-seg { box-shadow: inset 2px 0 0 var(--surface); }
+.mix-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 0; padding: 0; font-size: 14px; }
+.mix-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.mix-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid var(--border-strong); }
+.mix-0 { background: var(--mix-0); }
+.mix-1 { background: var(--mix-1); }
+.mix-2 { background: var(--mix-2); }
+.mix-3 { background: var(--mix-3); }
+.mix-4 { background: var(--mix-4); }
 .chart .pt-so .dot { fill: var(--surface); stroke: var(--yellow); stroke-width: 2.5; }
 
 
@@ -772,6 +811,11 @@ img.avatar { object-fit: cover; padding: 0; }
   --tint-strong: rgba(255, 212, 0, 0.38);
   --tint-mid: rgba(255, 212, 0, 0.22);
   --tint-weak: rgba(255, 212, 0, 0.04);
+  --mix-0: #e1e1dd;
+  --mix-1: rgba(255, 212, 0, 0.35);
+  --mix-2: rgba(255, 212, 0, 0.70);
+  --mix-3: #ffd400;
+  --mix-4: #111111;
   --row-hover: rgba(0, 0, 0, 0.03);
   --tip-bg: #111111;
   --tip-ink: #ffffff;
@@ -838,6 +882,7 @@ img.avatar { object-fit: cover; padding: 0; }
 }
 :root[data-theme="light"] .next-num { opacity: 0.3; }
 :root[data-theme="light"] .record-value { align-self: flex-start; box-shadow: inset 0 -0.22em 0 var(--yellow); }
+:root[data-theme="light"] .score-value { display: inline-block; box-shadow: inset 0 -0.22em 0 var(--yellow); }
 :root[data-theme="light"] .badge { background: var(--yellow); border-color: var(--yellow); }
 :root[data-theme="light"] .champ-trophy { opacity: 0.08; }
 :root[data-theme="light"] .tour-card:hover,
@@ -945,6 +990,8 @@ img.avatar { object-fit: cover; padding: 0; }
   .kpis { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .kpis-6 { grid-template-columns: repeat(2, 1fr); }
   .kpi { padding: 16px 18px; }
+  .score-tiles { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .score-tile { padding: 14px 16px 12px; }
   .section { margin-top: 48px; }
   .tour-grid { grid-template-columns: 1fr; }
   .tour-card { gap: 14px; padding: 16px; }

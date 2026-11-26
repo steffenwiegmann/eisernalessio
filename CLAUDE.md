@@ -61,16 +61,16 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 
 ## Druckvorlagen (Turnierpläne)
 
-- `druck/` enthält Word-Turnierpläne (`EA-Masters-Turnierplan-<n>-Spieler.docx`, 4–8 Spieler, je genau 3 A4-Seiten: Turnierplan + Ergebnisse/Statistik + Autodarts-Protokoll (Darts und Ø je Spieler und Match)) zum Ausdrucken und Ausfüllen per Hand.
+- `druck/` enthält Word-Turnierpläne (`EA-Masters-Turnierplan-<n>-Spieler.docx`, 4–8 Spieler, je genau 3 A4-Seiten: Turnierplan + Ergebnisse/Statistik + Autodarts-Protokoll (Darts, Ø und Aufnahmen 60+/100+/140+/180 je Spieler und Match)) zum Ausdrucken und Ausfüllen per Hand.
 - Erzeugt von `cd druck && npm install && node generate-word.js` (npm-Paket `docx`) aus den Formaten in `FORMATS`. Die .docx nicht von Hand ändern, sondern Generator anpassen und neu erzeugen.
 - Nach Änderungen prüfen, dass jede Datei genau 3 Seiten hat (Regelwerk: 2) (z. B. per Word-COM `ComputeStatistics(2)` in PowerShell und PDF-Export).
-- Statistik-Tabellen auf Blatt 2 entsprechen der bisherigen Word-Vorlage: „Statistiken – Gesamtturnier“ (Spieler, 3-Darts Avg, Highest Score, Checkout, Highest Checkout, Minimum Darts (Avg)) und „Bestwerte des Turniers“ (Kategorie, Wert, Spieler).
+- Statistik-Tabellen auf Blatt 2 entsprechen der bisherigen Word-Vorlage: „Statistiken – Gesamtturnier“ (Spieler, 3-Darts Avg, Highest Score, Checkout, Highest Checkout, Minimum Darts (Avg), 60+, 100+, 140+, 180) und „Bestwerte des Turniers“ (Kategorie, Wert, Spieler; inkl. Meiste Tonnen 100+). Aufnahmen werden in Bereichen gezählt wie bei Autodarts (60–99, 100–139, 140–179, 180).
 - Modus ist immer fest **501 · Double Out · Legmodus**. „Best of ____“ bleibt leer zum Eintragen und heißt überall gleich (nie „BO“).
 - Vor dem Neuerzeugen prüfen, ob die vorhandenen .docx von Hand geändert wurden (Text mit frisch erzeugter Version vergleichen) und Änderungen erst ins Skript übernehmen – sonst gehen sie verloren.
 - Formate: 4 = 1 Gruppe Hin+Rück · 5 = 1 Gruppe einfach · 6 = 2×3 Hin+Rück · 7 = 4er einfach + 3er Hin+Rück · 8 = 2×4 einfach. Platzierungsspiele stehen immer in der Reihenfolge Platz 7 → Platz 5 → Platz 3 (vom Turnierleiter so festgelegt, nicht umdrehen). Danach Halbfinale (1.–4./2.–3. bzw. „1. A – 2. B“/„1. B – 2. A“), Platz 3, ggf. Platz 5 („3. A – 3. B“)/7, Finale. In der Endrunde immer „Platz. Gruppe“ schreiben, nie „A1“ (das sind die Spielerplätze in der Gruppe). Bei einer Gruppe heißen die Spieler A–E.
 - Regelwerk als Word: `cd druck && node rules-word.js` → `druck/EA-Masters-Regeln.docx`. Texte in `rules-word.js` müssen wortgleich mit `eamastersrules.html` bleiben (bei Regeländerungen beide anpassen).
 - Ausgefüllte Ergebnis-Dokumente je Turnier: `cd druck && node fill-word.js [nr]` → `druck/ausgefuellt/EA-Masters-<röm>-Ergebnisse.docx` (füllt die Vorlage mit Daten aus `js/data.js`; Vorlagen selbst bleiben unverändert).
-- Ausgefüllte Bögen (Foto/Scan) werden in `js/data.js` übertragen: Gruppenspiele → `groupMatches`, Tabellen → `groups`, Endrunde → `knockout`, Blatt 2 „Statistiken – Gesamtturnier“ → `stats` (Checkout als `coHit`/`coAtt`, Minimum Darts → `minDarts`), Ballon Dart → `ballonDart`.
+- Ausgefüllte Bögen (Foto/Scan) werden in `js/data.js` übertragen: Gruppenspiele → `groupMatches`, Tabellen → `groups`, Endrunde → `knockout`, Blatt 2 „Statistiken – Gesamtturnier“ → `stats` (Checkout als `coHit`/`coAtt`, Minimum Darts → `minDarts`, Aufnahmen → `s60`/`s100`/`s140`/`s180`), Blatt 3 → `n1`/`n2`, `a1`/`a2`, `sc1`/`sc2` je Match, Ballon Dart → `ballonDart`.
 
 ## Spielerprofile, Ereignisse, Uhr
 
@@ -85,7 +85,8 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 
 - Masters II: nur Endrunde und Platzierungen bekannt, keine Gruppen- oder Spielerstatistik.
 - Masters I, Platz 3 wurde als Dreier-Spiel (Otter, Quaasus, Killernini) ausgespielt → als Textmatch erfasst.
-- Masters III: Die Originalseite nannte bei den Bestwerten für Fynn „55,03“, in der Spielertabelle „53,03“. Verwendet wird 53,03 (Bestwerte werden jetzt berechnet).
+- Masters III und IV: Alle Matches mit Autodarts abgeglichen (Ø, Darts `n1`/`n2`, Checkouts, Aufnahmen `sc1`/`sc2`). Korrigiert: Fynn III Ø 53,15 (Original 53,03 bzw. 55,03), Finale III Katsche 47,41, Quaasus–Fynn d1 87, IV Reto–Fynn c2 2/23, Sweaty IV Checkout 4/59. Turnier-Averages und Aufnahmen werden aus den Matches berechnet.
+- Autodarts-Konto: play.autodarts.com → Stats → Match-Verlauf. Am Turniertag gibt es auch Einwerf- und Spaßspiele vor/nach dem Turnier – nur die Turnierspiele übernehmen.
 - Masters I: Otter in der Gruppentabelle auf 3-1 Legs korrigiert (laut Einzelspielen; Original zeigte 2-2).
 - Masters IV: Katsches Checkout auf 9/60 korrigiert (Summe der Matches; Original zeigte 9/160 bei 15 %).
 
@@ -94,4 +95,4 @@ Jede Seite hat `<div id="site-header">`, `<main id="app">` (bzw. statisches `<ma
 - Änderungen lokal machen, mit `node .claude/serve.js` im Browser prüfen (auch Handy-Breite), dann committen und auf `main` pushen.
 - Commit-Messages kurz auf Deutsch.
 - Vor dem Push: Seiten auf JS-Fehler prüfen (Konsole) und sicherstellen, dass interne Links funktionieren.
-- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=15`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.
+- **Cache-Busting:** CSS/JS werden mit `?v=N` eingebunden (aktuell `?v=16`). Bei jeder Änderung an `style.css`, `js/app.js` oder `js/data.js` die Versionsnummer in **allen** HTML-Seiten hochzählen – sonst zeigen Browser (v. a. Firefox) bis zu 10 Minuten altes CSS/JS zu neuem HTML.

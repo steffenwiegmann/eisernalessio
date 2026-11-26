@@ -65,18 +65,30 @@
   TOURS.forEach((t) => {
     const acc = {};
     const all = t.groupMatches.concat(...t.groups.map((g) => g.tiebreak || []), t.knockout.filter((m) => m.p1 && m.p2));
-    all.forEach((m) => [[m.p1, m.a1, m.n1], [m.p2, m.a2, m.n2]].forEach(([p, a, n]) => {
-      const o = acc[p] || (acc[p] = { pts: 0, darts: 0, complete: true });
-      if (isNum(a) && isNum(n) && n > 0) { o.pts += (a * n) / 3; o.darts += n; } else o.complete = false;
+    all.forEach((m) => [[m.p1, m.a1, m.n1, m.sc1], [m.p2, m.a2, m.n2, m.sc2]].forEach(([p, a, n, sc]) => {
+      const o = acc[p] || (acc[p] = { pts: 0, darts: 0, complete: true, sc: [0, 0, 0, 0], scComplete: true });
+      // Punkte sind ganzzahlig: Runden gleicht die 2-Nachkommastellen-Rundung des Match-Averages aus
+      if (isNum(a) && isNum(n) && n > 0) { o.pts += Math.round((a * n) / 3); o.darts += n; } else o.complete = false;
+      if (Array.isArray(sc) && sc.length === 4) sc.forEach((v, i) => { o.sc[i] += v; }); else o.scComplete = false;
     }));
     Object.keys(acc).forEach((p) => {
       const o = acc[p];
-      if (!o.complete || !o.darts) return;
-      let s = t.stats.find((x) => x.p === p);
-      if (!s) { s = { p }; t.stats.push(s); }
-      s.avg = Math.round(((o.pts / o.darts) * 3) * 100) / 100;
-      s.avgCalc = true;
-      s.dartsTotal = o.darts;
+      const stat = () => {
+        let s = t.stats.find((x) => x.p === p);
+        if (!s) { s = { p }; t.stats.push(s); }
+        return s;
+      };
+      if (o.complete && o.darts) {
+        const s = stat();
+        s.avg = Math.round(((o.pts / o.darts) * 3) * 100) / 100;
+        s.avgCalc = true;
+        s.dartsTotal = o.darts;
+      }
+      // Aufnahmen 60–99 / 100–139 / 140–179 / 180 aus den Matches summieren
+      if (o.scComplete) {
+        const s = stat();
+        ['s60', 's100', 's140', 's180'].forEach((k, i) => { s[k] = o.sc[i]; });
+      }
     });
   });
 
@@ -123,6 +135,14 @@
   const STAT_DO = STAT_ROWS.filter((s) => !s.t.so); // modusabhängige Werte (Average, Checkout, Finish, Shortest Leg)
   const STAT_SO = STAT_ROWS.filter((s) => s.t.so);
 
+  // Aufnahmen in Bereichen wie bei Autodarts: 60–99, 100–139, 140–179, 180
+  const SC_KEYS = ['s60', 's100', 's140', 's180'];
+  const SC_LABELS = ['60+', '100+', '140+', '180'];
+  const SC_RANGES = ['60–99', '100–139', '140–179', '180'];
+  const hasScoring = (s) => SC_KEYS.every((k) => isNum(s[k]));
+  const tons = (s) => s.s100 + s.s140 + s.s180; // „Tonnen“ = alle Aufnahmen ab 100
+  const STAT_SC = STAT_ROWS.filter(hasScoring);
+
   // Spieler-Aggregate
   const AGG = {};
   PLAYER_NAMES.forEach((n) => {
@@ -130,6 +150,7 @@
       name: n, founder: isFounder(n), entries: [], places: [], titles: 0, finals: 0, podiums: 0,
       avgs: [], avgChart: [], best: {}, mW: 0, mL: 0, lW: 0, lL: 0, ballon: 0, hosted: 0, h2h: {},
       s180: 0, ninedarter: 0, hiFin: [],
+      sc: null, // Aufnahmen [60–99, 100–139, 140–179, 180] über alle Turniere mit Daten
       profile: (D.players || {})[n] || {}
     };
   });
@@ -151,6 +172,14 @@
       if (place === 1) a.titles++;
       if (place <= 2) a.finals++;
       if (place <= 3) a.podiums++;
+      if (stat && hasScoring(stat)) {
+        // dv/darts: nur Turniere mit bekannter Dartzahl (für Quoten und Scoring-Mix)
+        const c = a.sc || (a.sc = { v: [0, 0, 0, 0], dv: [0, 0, 0, 0], darts: 0, tours: [] });
+        SC_KEYS.forEach((k, i) => { c.v[i] += stat[k]; });
+        c.tours.push(t);
+        if (isNum(stat.dartsTotal)) { c.darts += stat.dartsTotal; SC_KEYS.forEach((k, i) => { c.dv[i] += stat[k]; }); }
+        keepBest(a, 'ton', tons(stat), t, 'max');
+      }
       if (stat) {
         if (isNum(stat.avg)) a.avgChart.push({ v: stat.avg, t });
         keepBest(a, 'hs', stat.hs, t, 'max');
@@ -557,11 +586,28 @@
     { k: 'co', l: 'Checkout', get: coRate, fmt: (v, s) => `${pct(v)} <small>${s.coHit}/${s.coAtt}</small>`, best: 'max', title: 'Checkout-Quote (Treffer/Versuche)' },
     { k: 'hco', l: 'Highest Finish', best: 'max', title: 'Höchstes Checkout' },
     { k: 'minDarts', l: 'Shortest Leg', best: 'min', fmt: (v) => `${v} <small>Ø ${num(avgFromDarts(v), 2)}</small>`, title: 'Kürzestes Leg in Darts' },
-    { k: 's60', l: '60+', best: 'max' },
-    { k: 's100', l: '100+', best: 'max' },
-    { k: 's140', l: '140+', best: 'max' },
-    { k: 's180', l: '180', best: 'max' }
+    { k: 's60', l: '60+', best: 'max', title: 'Aufnahmen mit 60–99 Punkten' },
+    { k: 's100', l: '100+', best: 'max', title: 'Aufnahmen mit 100–139 Punkten' },
+    { k: 's140', l: '140+', best: 'max', title: 'Aufnahmen mit 140–179 Punkten' },
+    { k: 's180', l: '180', best: 'max', title: '180er' }
   ];
+
+  // Scoring-Mix: gestapelter Balken aller Aufnahmen (unter 60 bis 180)
+  function scoreMix(v, darts) {
+    const visits = darts ? Math.round(darts / 3) : 0;
+    const low = visits ? Math.max(0, visits - v.reduce((s, x) => s + x, 0)) : null;
+    const parts = (low != null ? [['< 60', low, 0]] : []).concat(v.map((x, i) => [SC_RANGES[i], x, i + 1]));
+    const total = parts.reduce((s, p) => s + p[1], 0) || 1;
+    const share = (x) => (x / total) * 100;
+    return `<div class="score-mix">
+      <div class="mix-bar" role="img" aria-label="Verteilung der Aufnahmen">
+        ${parts.filter((p) => p[1] > 0).map(([l, x, k]) => `<span class="mix-seg mix-${k}" style="--w:${share(x).toFixed(2)}%" title="${esc(l)}: ${x} (${num(share(x), 1)} %)"></span>`).join('')}
+      </div>
+      <ul class="mix-legend">
+        ${parts.map(([l, x, k]) => `<li><i class="mix-${k}"></i>${esc(l)} <strong class="num">${x}</strong>${low != null ? ` <span class="muted">${num(share(x), 1)} %</span>` : ''}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
 
   function statsTable(t) {
     const order = (p) => { const i = t.placements.indexOf(p); return i < 0 ? 99 : i; };
@@ -583,13 +629,14 @@
   }
 
   function tourBests(t) {
-    const S = t.stats.map((s) => Object.assign({ co: coRate(s) }, s));
+    const S = t.stats.map((s) => Object.assign({ co: coRate(s), ton: hasScoring(s) ? tons(s) : null }, s));
     const defs = [
       ['3-Dart-Average', 'avg', 'max', (v) => num(v, 2)],
       ['High Score', 'hs', 'max', (v) => v],
       ['Highest Finish', 'hco', 'max', (v) => v],
       ['Shortest Leg', 'minDarts', 'min', (v) => v + ' Darts'],
-      ['Checkout-Quote', 'co', 'max', pct]
+      ['Checkout-Quote', 'co', 'max', pct],
+      ['Meiste Tonnen (100+)', 'ton', 'max', (v) => v + '×']
     ];
     const tiles = defs.map(([label, k, dir, f]) => {
       const b = best(S.map((s) => ({ v: s[k], p: s.p })), dir);
@@ -745,8 +792,30 @@
       recordCard('Höchster Score', best(STAT_ROWS.map((s) => ({ v: s.hs, p: s.p, t: s.t })), 'max'), (v) => v, whoT),
       doRec[2], doRec[3], doRec[4],
       recordCard('Deutlichster Leg-Sieg', best(legWins, 'max'), (v) => '+' + v, (i) => `${pLink(i.p)} <span class="muted">vs. ${esc(i.o)} · ${tLink(i.t)}</span>`, 'Restpunkte des Gegners'),
-      recordCard('Meiste Titel', best(players.map((a) => ({ v: a.titles, p: a.name })), 'max'), (v) => v + '×', (i) => pLink(i.p))
+      recordCard('Meiste Titel', best(players.map((a) => ({ v: a.titles, p: a.name })), 'max'), (v) => v + '×', (i) => pLink(i.p)),
+      recordCard('Meiste Tonnen (100+)', best(STAT_SC.map((s) => ({ v: tons(s), p: s.p, t: s.t })), 'max'), (v) => v + '×', whoT, 'in einem Turnier')
     ].join('');
+
+    // Aufnahmen über alle Turniere mit Autodarts-Daten
+    const scPlayers = players.filter((a) => a.sc).map((a) => {
+      const ton = a.sc.v[1] + a.sc.v[2] + a.sc.v[3];
+      const visits = a.sc.darts ? a.sc.darts / 3 : null;
+      return { a, v: a.sc.v, ton, visits, rate: visits ? (a.sc.dv[1] + a.sc.dv[2] + a.sc.dv[3]) / visits : null };
+    }).sort((x, y) => y.ton - x.ton || y.v[0] - x.v[0]);
+    const scTours = TOURS.filter((t) => t.stats.some(hasScoring));
+    const scBest = [0, 1, 2, 3].map((i) => Math.max.apply(null, scPlayers.map((r) => r.v[i])));
+    const scRateBest = Math.max.apply(null, scPlayers.map((r) => r.rate || 0));
+    const scoringTable = scPlayers.length ? table(
+      [{ l: 'Spieler' }, { l: 'Turniere', cls: 'r' }].concat(SC_LABELS.map((l, i) => ({ l, cls: 'r', title: 'Aufnahmen mit ' + SC_RANGES[i] + ' Punkten' })),
+        [{ l: 'Tonnen', cls: 'r', title: 'Alle Aufnahmen ab 100 Punkten' }, { l: 'Tonnen-Quote', cls: 'r', title: 'Anteil der Aufnahmen ab 100 (Aufnahmen ≈ Darts ÷ 3, nur Turniere mit Autodarts-Dartzahl)' }]),
+      scPlayers.map((r) => `<tr>
+        <td>${pLink(r.a.name)}</td>
+        <td class="r num">${r.a.sc.tours.length}</td>
+        ${r.v.map((x, i) => `<td class="r num${x && x === scBest[i] ? ' best' : ''}">${x}</td>`).join('')}
+        <td class="r num strong">${r.ton}</td>
+        <td class="r num${r.rate && r.rate === scRateBest ? ' best' : ''}">${r.rate != null ? `${pct(r.rate)}${r.rate > 0 ? ` <small>jede ${num(1 / r.rate, 1)}.</small>` : ''}` : '–'}</td>
+      </tr>`), 'stats') : '';
+    const tonRank = scPlayers.map((r) => ({ label: r.a.name, href: pUrl(r.a.name), v: r.ton, display: String(r.ton), tip: `${r.a.name}: ${r.v[1]}× 100+, ${r.v[2]}× 140+, ${r.v[3]}× 180` }));
     const soTours = TOURS.filter((t) => t.so);
     const soRecords = STAT_SO.length ? modeRecords(STAT_SO, true).join('') : '';
 
@@ -820,6 +889,11 @@
       <p class="muted small">Sortiert nach Titeln, Finalteilnahmen, Podien und durchschnittlicher Platzierung.</p>
       ${eternalTable}
     </section>
+    ${scoringTable ? `<section class="wrap section">
+      ${sectionHead('Scoring', 'Aufnahmen &amp; Tonnen', '<span class="legend-best"><i></i> Bestwert</span>')}
+      <p class="muted small">Gezählt wie bei Autodarts in Bereichen: 60+ = 60–99, 100+ = 100–139, 140+ = 140–179. Tonnen = alle Aufnahmen ab 100. Daten aus ${scTours.map((t) => t.title).join(', ')}.</p>
+      ${scoringTable}
+    </section>` : ''}
     <section class="wrap section chart-grid">
       <div class="panel">
         ${sectionHead('Rangliste', 'Ø 3-Dart-Average')}
@@ -836,6 +910,11 @@
         <p class="muted small">Alle Matches mit bekanntem Ergebnis, ab 4 Matches.</p>
         ${barChart(winRank, { max: 1 })}
       </div>
+      ${tonRank.length ? `<div class="panel">
+        ${sectionHead('Rangliste', 'Tonnen (100+)')}
+        <p class="muted small">Alle Aufnahmen ab 100 Punkten über alle Turniere mit Autodarts-Daten.</p>
+        ${barChart(tonRank)}
+      </div>` : ''}
       <div class="panel">
         ${sectionHead('Nebenschauplätze', 'Ehrungen &amp; Momente')}
         ${table([{ l: 'Spieler' }, { l: '🏠', cls: 'r', title: 'Wie oft ausgerichtet' }, { l: '🎈', cls: 'r', title: 'Ballon-Dart-Siege' }, { l: '💥 180', cls: 'r', title: '180er' }],
@@ -1053,11 +1132,44 @@
       rec('Bester Match-Average', B.matchAvg, (v) => num(v, 2)),
       rec('High Score', B.hs, (v) => v),
       rec('Highest Finish', B.hco, (v) => v),
-      rec('Shortest Leg', B.minDarts, (v) => v + ' Darts')
+      rec('Shortest Leg', B.minDarts, (v) => v + ' Darts'),
+      rec('Meiste Tonnen (100+)', B.ton, (v) => v + '×')
     ].join('');
 
+    // Scoring: Aufnahmen 60+/100+/140+/180 (Autodarts)
+    let scoring = '';
+    if (a.sc) {
+      const v = a.sc.v;
+      const ton = v[1] + v[2] + v[3];
+      const visits = a.sc.darts ? a.sc.darts / 3 : null;
+      const dTon = a.sc.dv[1] + a.sc.dv[2] + a.sc.dv[3];
+      const perTour = (x) => num(x / a.sc.tours.length, 1);
+      const tiles = v.map((x, i) => `<div class="score-tile${i === 3 && x ? ' score-180' : ''}">
+          <div class="score-label">${SC_LABELS[i]}</div>
+          <div class="score-value">${x}</div>
+          <div class="score-sub">${i === 3 ? (x ? 'Höchststrafe! 💥' : 'die Jagd läuft …') : `${SC_RANGES[i]} Punkte · Ø ${perTour(x)} je Turnier`}</div>
+        </div>`).join('');
+      const dTours = a.sc.tours.filter((t) => { const s = t.stats.find((x) => x.p === a.name); return s && isNum(s.dartsTotal); });
+      const fun = (visits && dTon
+        ? `Im Schnitt ist <strong>jede ${num(visits / dTon, 1)}. Aufnahme</strong> eine Tonne (100+). `
+        : '') + (ton ? `Insgesamt <strong>${ton} Tonnen</strong> bei den EA Masters.` : 'Die erste Tonne lässt noch auf sich warten.');
+      scoring = `<section class="wrap section">
+        ${sectionHead('Scoring', 'Aufnahmen')}
+        <div class="score-tiles">${tiles}</div>
+        <div class="panel score-panel">
+          <p class="kicker">Scoring-Mix${visits ? ` · Masters ${dTours.map((t) => t.roman).join(' + ')}` : ''}</p>
+          ${visits ? scoreMix(a.sc.dv, a.sc.darts) : scoreMix(v, 0)}
+          <p class="score-fun">${fun}</p>
+          <p class="muted small">Aufnahmen aus ${a.sc.tours.map(tLink).join(', ')}. Gezählt wie bei Autodarts in Bereichen: 60+ = 60–99, 100+ = 100–139, 140+ = 140–179.</p>
+        </div>
+      </section>`;
+    }
+    const showSc = a.entries.some((e) => e.stat && hasScoring(e.stat));
+    const scCells = (e) => (showSc ? SC_KEYS.map((k) => `<td class="r num">${e.stat && isNum(e.stat[k]) ? e.stat[k] : '–'}</td>`).join('') : '');
+
     const history = table(
-      [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Platz', cls: 'c' }, { l: '3-Dart Ø', cls: 'r' }, { l: 'High Score', cls: 'r' }, { l: 'Highest Finish', cls: 'r' }, { l: 'Shortest Leg', cls: 'r' }],
+      [{ l: 'Turnier' }, { l: 'Datum' }, { l: 'Platz', cls: 'c' }, { l: '3-Dart Ø', cls: 'r' }, { l: 'High Score', cls: 'r' }, { l: 'Highest Finish', cls: 'r' }, { l: 'Shortest Leg', cls: 'r' }]
+        .concat(showSc ? SC_LABELS.map((l, i) => ({ l, cls: 'r', title: 'Aufnahmen mit ' + SC_RANGES[i] + ' Punkten' })) : []),
       a.entries.slice().reverse().map((e) => `<tr>
         <td>${tLink(e.t)}${e.t.so ? ' ' + soTag : ''}${e.t.ballonDart === a.name ? ' <span title="Ballon-Dart-Sieger">🎈</span>' : ''}${e.t.host === a.name ? ' <span title="Ausrichter">🏠</span>' : ''}</td>
         <td class="num">${dateShort(e.t.date)}</td>
@@ -1066,6 +1178,7 @@
         <td class="r num">${e.stat ? num(e.stat.hs) : '–'}</td>
         <td class="r num">${e.stat ? num(e.stat.hco) : '–'}</td>
         <td class="r num">${e.stat && isNum(e.stat.minDarts) ? e.stat.minDarts : '–'}</td>
+        ${scCells(e)}
       </tr>`));
 
     const h2h = Object.entries(a.h2h).sort((x, y) => (y[1].w + y[1].l) - (x[1].w + x[1].l) || y[1].w - x[1].w);
@@ -1115,6 +1228,7 @@
       <div class="panel">${sectionHead('Automatisch ermittelt', 'Fakten')}${autoFacts}</div>
     </section>
     ${records ? `<section class="wrap section">${sectionHead('Persönliche', 'Bestwerte')}<div class="records">${records}</div></section>` : ''}
+    ${scoring}
     <section class="wrap section">
       ${sectionHead('Karriere', 'Turnierhistorie')}
       ${history}
