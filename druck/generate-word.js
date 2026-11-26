@@ -381,7 +381,7 @@ function page2(n) {
     const w = [520, cw - 520 - SAFE];
     rankRows = table(w, Array.from({ length: n }, (_, r) => row([rankCell(r + 1, w[0]), lineCell(w[1], F && F.placements[r])], 440)));
   }
-  const honors = table([2400, cw - 2400 - SAFE], ['🏆 Turniersieger', '🎈 Ballon-Dart-Sieger', '🏠 Nächster Ausrichter', '🤷 Beste Ausrede'].map((t, i) =>
+  const honors = table([2400, cw - 2400 - SAFE], ['🏆 Turniersieger', '🎈 Ballon-Dart-Sieger', '🏠 Nächster Ausrichter'].map((t, i) =>
     row([cell(para(run(t.toUpperCase(), { bold: true, size: 14, spacing: 10 })), 2400, { vAlign: VerticalAlign.BOTTOM }), lineCell(cw - 2400 - SAFE, F && F.honors[i])], 500)));
 
   // Spieler | Avg | Highest Score | Checkout | Highest Checkout | Minimum Darts | 60+ | 100+ | 140+ | 180
@@ -402,7 +402,7 @@ function page2(n) {
 
   const bw = [3500, 2500, W - 6000 - SAFE];
   const bests = table(bw, [row([th('Kategorie', bw[0]), th('Wert', bw[1], { align: AlignmentType.CENTER }), th('Spieler', bw[2])], null, { header: true })].concat(
-    ['3-Dart Average', 'Highest Score', 'Checkout (%)', 'Highest Checkout', 'Minimum Darts (Avg)', 'Meiste Tonnen (100+)'].map((k, i) =>
+    ['3-Dart Average', 'Highest Score', 'Checkout (%)', 'Highest Checkout', 'Minimum Darts (Avg)', 'Meiste Ton+ (ab 100)'].map((k, i) =>
       row([cell(para(run(k, { bold: true })), bw[0]),
         cell(para(fv(F && F.bests[i] ? F.bests[i][0] : ''), F ? { align: AlignmentType.CENTER } : {}), bw[1]),
         cell(para(fv(F && F.bests[i] ? F.bests[i][1] : '')), bw[2])], 420))), { borders: GRID });

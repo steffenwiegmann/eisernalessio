@@ -140,7 +140,7 @@
   const SC_LABELS = ['60+', '100+', '140+', '180'];
   const SC_RANGES = ['60–99', '100–139', '140–179', '180'];
   const hasScoring = (s) => SC_KEYS.every((k) => isNum(s[k]));
-  const tons = (s) => s.s100 + s.s140 + s.s180; // „Tonnen“ = alle Aufnahmen ab 100
+  const tons = (s) => s.s100 + s.s140 + s.s180; // „Ton+“ = alle Aufnahmen ab 100
   const STAT_SC = STAT_ROWS.filter(hasScoring);
 
   // Spieler-Aggregate
@@ -636,7 +636,7 @@
       ['Highest Finish', 'hco', 'max', (v) => v],
       ['Shortest Leg', 'minDarts', 'min', (v) => v + ' Darts'],
       ['Checkout-Quote', 'co', 'max', pct],
-      ['Meiste Tonnen (100+)', 'ton', 'max', (v) => v + '×']
+      ['Meiste Ton+', 'ton', 'max', (v) => v + '×']
     ];
     const tiles = defs.map(([label, k, dir, f]) => {
       const b = best(S.map((s) => ({ v: s[k], p: s.p })), dir);
@@ -793,7 +793,7 @@
       doRec[2], doRec[3], doRec[4],
       recordCard('Deutlichster Leg-Sieg', best(legWins, 'max'), (v) => '+' + v, (i) => `${pLink(i.p)} <span class="muted">vs. ${esc(i.o)} · ${tLink(i.t)}</span>`, 'Restpunkte des Gegners'),
       recordCard('Meiste Titel', best(players.map((a) => ({ v: a.titles, p: a.name })), 'max'), (v) => v + '×', (i) => pLink(i.p)),
-      recordCard('Meiste Tonnen (100+)', best(STAT_SC.map((s) => ({ v: tons(s), p: s.p, t: s.t })), 'max'), (v) => v + '×', whoT, 'in einem Turnier')
+      recordCard('Meiste Ton+', best(STAT_SC.map((s) => ({ v: tons(s), p: s.p, t: s.t })), 'max'), (v) => v + '×', whoT, 'in einem Turnier')
     ].join('');
 
     // Aufnahmen über alle Turniere mit Autodarts-Daten
@@ -807,7 +807,7 @@
     const scRateBest = Math.max.apply(null, scPlayers.map((r) => r.rate || 0));
     const scoringTable = scPlayers.length ? table(
       [{ l: 'Spieler' }, { l: 'Turniere', cls: 'r' }].concat(SC_LABELS.map((l, i) => ({ l, cls: 'r', title: 'Aufnahmen mit ' + SC_RANGES[i] + ' Punkten' })),
-        [{ l: 'Tonnen', cls: 'r', title: 'Alle Aufnahmen ab 100 Punkten' }, { l: 'Tonnen-Quote', cls: 'r', title: 'Anteil der Aufnahmen ab 100 (Aufnahmen ≈ Darts ÷ 3, nur Turniere mit Autodarts-Dartzahl)' }]),
+        [{ l: 'Ton+', cls: 'r', title: 'Alle Aufnahmen ab 100 Punkten' }, { l: 'Ton+-Quote', cls: 'r', title: 'Anteil der Aufnahmen ab 100 (Aufnahmen ≈ Darts ÷ 3, nur Turniere mit Autodarts-Dartzahl)' }]),
       scPlayers.map((r) => `<tr>
         <td>${pLink(r.a.name)}</td>
         <td class="r num">${r.a.sc.tours.length}</td>
@@ -890,8 +890,8 @@
       ${eternalTable}
     </section>
     ${scoringTable ? `<section class="wrap section">
-      ${sectionHead('Scoring', 'Aufnahmen &amp; Tonnen', '<span class="legend-best"><i></i> Bestwert</span>')}
-      <p class="muted small">Gezählt wie bei Autodarts in Bereichen: 60+ = 60–99, 100+ = 100–139, 140+ = 140–179. Tonnen = alle Aufnahmen ab 100. Daten aus ${scTours.map((t) => t.title).join(', ')}.</p>
+      ${sectionHead('Scoring', 'Aufnahmen &amp; Ton+', '<span class="legend-best"><i></i> Bestwert</span>')}
+      <p class="muted small">Gezählt wie bei Autodarts in Bereichen: 60+ = 60–99, 100+ = 100–139, 140+ = 140–179. Ton+ = alle Aufnahmen ab 100. Daten aus ${scTours.map((t) => t.title).join(', ')}.</p>
       ${scoringTable}
     </section>` : ''}
     <section class="wrap section chart-grid">
@@ -911,8 +911,8 @@
         ${barChart(winRank, { max: 1 })}
       </div>
       ${tonRank.length ? `<div class="panel">
-        ${sectionHead('Rangliste', 'Tonnen (100+)')}
-        <p class="muted small">Alle Aufnahmen ab 100 Punkten über alle Turniere mit Autodarts-Daten.</p>
+        ${sectionHead('Rangliste', 'Ton+')}
+        <p class="muted small">Alle Aufnahmen ab 100 Punkten aus ${scTours.map((t) => t.title).join(', ')}.</p>
         ${barChart(tonRank)}
       </div>` : ''}
       <div class="panel">
@@ -1133,7 +1133,7 @@
       rec('High Score', B.hs, (v) => v),
       rec('Highest Finish', B.hco, (v) => v),
       rec('Shortest Leg', B.minDarts, (v) => v + ' Darts'),
-      rec('Meiste Tonnen (100+)', B.ton, (v) => v + '×')
+      rec('Meiste Ton+', B.ton, (v) => v + '×')
     ].join('');
 
     // Scoring: Aufnahmen 60+/100+/140+/180 (Autodarts)
@@ -1143,7 +1143,9 @@
       const ton = v[1] + v[2] + v[3];
       const visits = a.sc.darts ? a.sc.darts / 3 : null;
       const dTon = a.sc.dv[1] + a.sc.dv[2] + a.sc.dv[3];
+      // Ø nur über Turniere mit Aufnahmen-Statistik (z. B. Masters II hat keine)
       const perTour = (x) => num(x / a.sc.tours.length, 1);
+      const noSc = a.entries.map((e) => e.t).filter((t) => !a.sc.tours.includes(t));
       const tiles = v.map((x, i) => `<div class="score-tile${i === 3 && x ? ' score-180' : ''}">
           <div class="score-label">${SC_LABELS[i]}</div>
           <div class="score-value">${x}</div>
@@ -1151,8 +1153,8 @@
         </div>`).join('');
       const dTours = a.sc.tours.filter((t) => { const s = t.stats.find((x) => x.p === a.name); return s && isNum(s.dartsTotal); });
       const fun = (visits && dTon
-        ? `Im Schnitt ist <strong>jede ${num(visits / dTon, 1)}. Aufnahme</strong> eine Tonne (100+). `
-        : '') + (ton ? `Insgesamt <strong>${ton} Tonnen</strong> bei den EA Masters.` : 'Die erste Tonne lässt noch auf sich warten.');
+        ? `Im Schnitt ist <strong>jede ${num(visits / dTon, 1)}. Aufnahme</strong> ein Ton+ (100 oder mehr). `
+        : '') + (ton ? `Insgesamt <strong>${ton}× Ton+</strong> bei den EA Masters.` : 'Der erste Ton+ lässt noch auf sich warten.');
       scoring = `<section class="wrap section">
         ${sectionHead('Scoring', 'Aufnahmen')}
         <div class="score-tiles">${tiles}</div>
@@ -1160,7 +1162,7 @@
           <p class="kicker">Scoring-Mix${visits ? ` · Masters ${dTours.map((t) => t.roman).join(' + ')}` : ''}</p>
           ${visits ? scoreMix(a.sc.dv, a.sc.darts) : scoreMix(v, 0)}
           <p class="score-fun">${fun}</p>
-          <p class="muted small">Aufnahmen aus ${a.sc.tours.map(tLink).join(', ')}. Gezählt wie bei Autodarts in Bereichen: 60+ = 60–99, 100+ = 100–139, 140+ = 140–179.</p>
+          <p class="muted small">Aufnahmen aus ${a.sc.tours.map(tLink).join(', ')}${noSc.length ? ` – ${noSc.map((t) => t.title).join(', ')} ${noSc.length === 1 ? 'hat' : 'haben'} keine Aufnahmen-Statistik und ${noSc.length === 1 ? 'zählt' : 'zählen'} auch beim Ø je Turnier nicht mit` : ''}. Gezählt wie bei Autodarts in Bereichen: 60+ = 60–99, 100+ = 100–139, 140+ = 140–179.</p>
         </div>
       </section>`;
     }

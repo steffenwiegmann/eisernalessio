@@ -188,7 +188,7 @@ function fillFor(t, next) {
     ko, koNotes,
     winner: t.placements[0],
     placements: t.placements,
-    honors: [t.placements[0], t.ballonDart || '', next ? next.host : t.placements[0], ''],
+    honors: [t.placements[0], t.ballonDart || '', next ? next.host : t.placements[0]],
     stats, bests, moments
   };
 }
